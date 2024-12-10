@@ -1,35 +1,17 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { useState } from "react";
+import "./App.css";
+import GameBoard from "./Gameboard";
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [state, setState] = useState({
+    player1Pits: [4, 4, 4, 4, 4, 4],
+    player2Pits: [4, 4, 4, 4, 4, 4],
+    player1Store: 0,
+    player2Store: 0,
+    currentPlayer: 1,
+  });
 
-  return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+  return <GameBoard state={state} setState={setState} />;
 }
 
-export default App
+export default App;
