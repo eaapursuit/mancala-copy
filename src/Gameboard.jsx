@@ -1,8 +1,8 @@
 import React, { useState } from "react";
 import { useTransition, animated } from "@react-spring/web";
-
 import "./Gameboard.css";
 import AI_hint from "./AI_hint";
+import Marble from "./Marble";
 
 function GameBoard({ state, setState }) {
   const [hint, setHint] = useState("");
@@ -129,11 +129,11 @@ function GameBoard({ state, setState }) {
           .map((stones, reverseIndex) => {
             const index = 12 - reverseIndex; // Map reverse index to actual index
 
-            //Generate stones as JSX elements
-            const stoneElements = Array(stones)
+            //Generate marble elements
+            const marbleElements = Array(stones)
               .fill()
               .map((_, idx) => (
-                <div key={`${index}-${idx}`} className="stone"></div>
+                <Marble key={`${index}-${idx}`} className="stone"/>
               ));
 
             return (
@@ -144,7 +144,7 @@ function GameBoard({ state, setState }) {
                 }`}
                 onClick={() => handlePitClick(2, index)}
               >
-                <div className="stones-container">{stoneElements}</div>
+                <div className="stones-container">{marbleElements}</div>
               </button>
             );
           })}
@@ -169,7 +169,9 @@ function GameBoard({ state, setState }) {
               {/* {Render stones} */}
               <div className="stones-container">
                 {transitions((style, _, idx) => (
-                  <animated.div key={idx} style={style} className="stone" />
+                  <animated.div key={idx} style={style} className="stone" >
+                    <Marble/>
+                  </animated.div>
                 ))}
               </div>
             </button>
