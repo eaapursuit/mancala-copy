@@ -2,6 +2,7 @@
 import React, { useState } from "react";
 import Gameboard from "./Gameboard";
 
+
 function App() {
   const [state, setState] = useState({
     pits: [4, 4, 4, 4, 4, 4, 0, 4, 4, 4, 4, 4, 4, 0],
