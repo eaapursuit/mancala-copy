@@ -9,6 +9,20 @@ function GameBoard({ state, setState }) {
   const [highlightedPit, setHighlightedPit] = useState(null);
   console.log("Gameboard state:", state); // Debug log
 
+  const resetGame = () => {
+    const initialPits = Array(14).fill(4); // Set 4 stones in each pit
+    initialPits[6] = 0; // Player 1's store
+    initialPits[13] = 0; // Player 2's store
+
+    setState({
+      pits: initialPits,
+      currentPlayer: 1, // Reset to Player 1's turn
+    });
+
+    setHint(""); // Clear any hints
+    setHighlightedPit(null); 
+  };
+
   const handlePitClick = (player, index) => {
     if (highlightedPit === index) setHighlightedPit(null); // Clear the highlight on click
     const isPlayer1 = player === 1;
@@ -180,8 +194,15 @@ function GameBoard({ state, setState }) {
             hint={hint}
             setHint={setHint}
           />
+          
         </div>
+        
       </div>
+      <div className="reset-container">
+      <button className="reset-button" onClick={resetGame}>
+        Reset Game
+      </button>
+    </div>
     </div>
   );
 }
