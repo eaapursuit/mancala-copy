@@ -1,16 +1,18 @@
 .mancala-board {
+  font-family: Arial, sans-serif;
+  font-size: 14px;
   display: grid;
   grid-template-columns: 100px 1fr 100px;
   grid-template-rows: auto;
   gap: 20px;
   padding: 20px;
-  background-color: #8B4513;
+  background-color: #8b4513;
   border-radius: 15px;
   max-width: 800px;
   margin: 0 auto;
 }
 .mancala {
-  background-color: #DEB887;
+  background-color: #deb887;
   border-radius: 50px;
   height: 300px;
   display: flex;
@@ -43,24 +45,24 @@
 }
 
 .stones-container {
-  display:flex;
+  display: flex;
   flex-wrap: wrap;
   gap: 4px;
 }
 
 .stone {
-width: 4px;
-height: 4px;
-background-color: #000;
-border-radius: 50%
+  width: 4px;
+  height: 4px;
+  background-color: #000;
+  border-radius: 50%;
 }
 
 .pit:hover {
   transform: scale(1.05);
-  background-color: #CD853F;
+  background-color: #cd853f;
 }
 .pit.active {
-  border-color: #FFD700;
+  border-color: #ffd700;
   box-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
 }
 .pit:disabled {
@@ -72,9 +74,22 @@ border-radius: 50%
   grid-row: 1 / span 2;
   grid-column: 3;
 }
+.mancala-player-store {
+  text-align: center;
+  background-color: #f0f0f0;
+  padding: 10px;
+  border-radius: 5px;
+}
 .player2 {
   grid-row: 1 / span 2;
   grid-column: 1;
+}
+.mancala-player-turn {
+  grid-column: 2 / span 1; /* Spans across the entire width of the board */
+  text-align: center;
+  background-color: #f0f0f0;
+  padding: 15px;
+  border-radius: 5px;
 }
 /* Responsive design */
 @media (max-width: 768px) {
@@ -97,7 +112,6 @@ border-radius: 50%
 .hint-container {
   grid-column: 1 / span 3; /* Spans across the entire width of the board */
   text-align: center;
-  margin-top: 20px;
 }
 .hint-card {
   display: inline-block;
@@ -122,5 +136,22 @@ border-radius: 50%
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+.pit.highlighted {
+  background-color: yellow;
+  border: 2px solid red;
+  animation: pulse 1s infinite;
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+  100% {
+    transform: scale(1);
   }
 }
