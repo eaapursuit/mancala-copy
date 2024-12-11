@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import "./Gameboard.css";
-import AI_hint from "./AI_hint";
+// import AI_hint from "./AI_hint";
 function GameBoard({ state, setState }) {
   const handlePitClick = (player, index) => {
     const isPlayer1 = player === 1;
