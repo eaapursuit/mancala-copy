@@ -1,4 +1,6 @@
 import React, { useState } from "react";
+import { useTransition, animated } from "@react-spring/web";
+
 import "./Gameboard.css";
 // import AI_hint from "./AI_hint";
 function GameBoard({ state, setState }) {
@@ -115,28 +117,50 @@ function GameBoard({ state, setState }) {
           .reverse()
           .map((stones, reverseIndex) => {
             const index = 12 - reverseIndex; // Map reverse index to actual index
+
+            //Generate stones as JSX elements
+            const stoneElements = Array(stones)
+              .fill()
+              .map((_, idx) => (
+                <div key={`${index}-${idx}`} className="stone"></div>
+              ));
+
             return (
               <button
                 key={index}
                 className={`pit ${state.currentPlayer === 2 ? "active" : ""}`}
                 onClick={() => handlePitClick(2, index)}
               >
-                {stones}
+                <div className="stones-container">{stoneElements}</div>
               </button>
             );
           })}
       </div>
       {/* Player's pits (0 to 5) */}
       <div className="pits">
-        {state.pits.slice(0, 6).map((stones, index) => (
-          <button
-            key={index}
-            className={`pit ${state.currentPlayer === 1 ? "active" : ""}`}
-            onClick={() => handlePitClick(1, index)}
-          >
-            {stones}
-          </button>
-        ))}
+        {state.pits.slice(0, 6).map((stones, index) => {
+          const transitions = useTransition(Array(stones).fill(), {
+            from: { opacity: 0, transform: "scale(0)" },
+            enter: { opacity: 1, transform: "scale(1)" },
+            leave: { opacity: 0, transform: "scale(0)" },
+            keys: (item, idx) => `${index}-${idx}`,
+          });
+
+          return (
+            <button
+              key={index}
+              className={`pit ${state.currentPlayer === 1 ? "active" : ""}`}
+              onClick={() => handlePitClick(1, index)}
+            >
+              {/* {Render stones} */}
+              <div className="stones-container">
+                {transitions((style, _, idx) => (
+                  <animated.div key={idx} style={style} className="stone" />
+                ))}
+              </div>
+            </button>
+          );
+        })}
       </div>
       {/* Player's store */}
       <div className="mancala player1">{state.pits[6]}</div>
