@@ -89,6 +89,7 @@ function getRandomImage(theme) {
   return images[Math.floor(Math.random() * images.length)];
 }
 
+
 function App() {
   const [state, setState] = useState({
     pits: [4, 4, 4, 4, 4, 4, 0, 4, 4, 4, 4, 4, 4, 0],

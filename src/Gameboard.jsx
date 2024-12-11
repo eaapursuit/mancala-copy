@@ -2,11 +2,26 @@ import React, { useState } from "react";
 import { useTransition, animated } from "@react-spring/web";
 import "./Gameboard.css";
 import AI_hint from "./AI_hint";
+import Marble from "./Marble";
 
 function GameBoard({ state, setState }) {
   const [hint, setHint] = useState("");
   const [highlightedPit, setHighlightedPit] = useState(null);
   console.log("Gameboard state:", state); // Debug log
+
+  const resetGame = () => {
+    const initialPits = Array(14).fill(4); // Set 4 stones in each pit
+    initialPits[6] = 0; // Player 1's store
+    initialPits[13] = 0; // Player 2's store
+
+    setState({
+      pits: initialPits,
+      currentPlayer: 1, // Reset to Player 1's turn
+    });
+
+    setHint(""); // Clear any hints
+    setHighlightedPit(null); 
+  };
 
   const handlePitClick = (player, index) => {
     if (highlightedPit === index) setHighlightedPit(null); // Clear the highlight on click
@@ -114,11 +129,11 @@ function GameBoard({ state, setState }) {
           .map((stones, reverseIndex) => {
             const index = 12 - reverseIndex; // Map reverse index to actual index
 
-            //Generate stones as JSX elements
-            const stoneElements = Array(stones)
+            //Generate marble elements
+            const marbleElements = Array(stones)
               .fill()
               .map((_, idx) => (
-                <div key={`${index}-${idx}`} className="stone"></div>
+                <Marble key={`${index}-${idx}`} className="stone"/>
               ));
 
             return (
@@ -129,7 +144,7 @@ function GameBoard({ state, setState }) {
                 }`}
                 onClick={() => handlePitClick(2, index)}
               >
-                <div className="stones-container">{stoneElements}</div>
+                <div className="stones-container">{marbleElements}</div>
               </button>
             );
           })}
@@ -154,7 +169,9 @@ function GameBoard({ state, setState }) {
               {/* {Render stones} */}
               <div className="stones-container">
                 {transitions((style, _, idx) => (
-                  <animated.div key={idx} style={style} className="stone" />
+                  <animated.div key={idx} style={style} className="stone" >
+                    <Marble/>
+                  </animated.div>
                 ))}
               </div>
             </button>
@@ -179,8 +196,15 @@ function GameBoard({ state, setState }) {
             hint={hint}
             setHint={setHint}
           />
+          
         </div>
+        
       </div>
+      <div className="reset-container">
+      <button className="reset-button" onClick={resetGame}>
+        Reset Game
+      </button>
+    </div>
     </div>
   );
 }

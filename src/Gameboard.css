@@ -127,6 +127,20 @@
   max-width: 90%;
   margin: 0 auto;
 }
+
+.reset-button{
+  padding: 12px 18px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  background-color: #fff;
+  color: #333;
+  font-size: 1em;
+  line-height: 1.5;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  animation: fadeIn 0.3s ease-in-out;
+  max-width: 90%;
+  margin: 0 auto;
+}
 /* Fade-in animation for the hint */
 @keyframes fadeIn {
   from {
@@ -143,6 +157,7 @@
   border: 3px solid red;
   animation: pulse 1s infinite;
 }
+
 
 @keyframes pulse {
   0% {
