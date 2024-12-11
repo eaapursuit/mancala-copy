@@ -29,18 +29,34 @@
   align-items: center;
 }
 .pit {
-  background-color: #deb887;
+  position: relative;
+  background: #e0b080;
   border-radius: 50%;
   width: 80px;
   height: 80px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 20px;
+  overflow: hidden;
+  /* font-size: 20px; */
   border: 3px solid #654321;
-  cursor: pointer;
-  transition: all 0.3s ease;
+  /* cursor: pointer; */
+  /* transition: all 0.3s ease; */
 }
+
+.stones-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.stone {
+  width: 4px;
+  height: 4px;
+  background-color: #000;
+  border-radius: 50%;
+}
+
 .pit:hover {
   transform: scale(1.05);
   background-color: #cd853f;
