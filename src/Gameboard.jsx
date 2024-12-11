@@ -1,106 +1,152 @@
 import React, { useState } from "react";
-
+import "./Gameboard.css";
+import AI_hint from "./AI_hint";
 function GameBoard({ state, setState }) {
-  const {
-    player1Pits,
-    player2Pits,
-    player1Store,
-    player2Store,
-    currentPlayer,
-  } = state;
-
   const handlePitClick = (player, index) => {
-    console.log(player1Store, player2Store);
-    if (currentPlayer !== player) {
+    const isPlayer1 = player === 1;
+    const pits = [...state.pits]; // Copy pits array
+    const playerStartIndex = isPlayer1 ? 0 : 7; // Starting index for the player's pits
+    const playerEndIndex = isPlayer1 ? 5 : 12; // Ending index for the player's pits
+    const storeIndex = isPlayer1 ? 6 : 13; // Index of the player's store
+    // Check if the pit is valid
+    if (state.currentPlayer !== player) {
       alert("It's not your turn!");
       return;
     }
-
-    const pits = player === 1 ? [...player1Pits] : [...player2Pits];
-    const opponentPits = player === 1 ? [...player2Pits] : [...player1Pits];
-    let newPlayer1Store = player1Store;
-    let newPlayer2Store = player2Store;
-
-    let stones = pits[index];
-    if (stones === 0) {
+    if (index < playerStartIndex || index > playerEndIndex) {
+      alert("You can only pick from your pits!");
+      return;
+    }
+    if (pits[index] === 0) {
       alert("You can't start from an empty pit!");
       return;
     }
-
+    // Distribute stones
+    let stones = pits[index];
     pits[index] = 0; // Empty the selected pit
     let currentIndex = index;
-
-    // Distribute stones
-    while (stones > 0) {
-      currentIndex++;
-      if (currentIndex < pits.length) {
-        // Add to current player's pits
-        pits[currentIndex]++;
-      } else if (currentIndex === pits.length) {
-        // Add to store if it's the current player's turn
-        if (player === 1) {
-          newPlayer1Store++;
-        } else {
-          newPlayer2Store++;
-        }
-        currentIndex = -1; // Reset index to start on opponent's side
-      } else if (currentIndex < pits.length * 2 + 1) {
-        // Add to opponent's pits
-        opponentPits[currentIndex - pits.length - 1]++;
-      } else {
-        // Reset index to start on current player's side
-        currentIndex = -1;
+    let lastLandedInStore = false;
+    while (
+      stones > 0 ||
+      (stones === 0 && currentIndex !== storeIndex && pits[currentIndex] > 1)
+    ) {
+      // If stones == 0 but the current pit has stones, grab them and continue
+      if (
+        stones === 0 &&
+        currentIndex !== storeIndex &&
+        pits[currentIndex] > 1
+      ) {
+        stones += pits[currentIndex];
+        pits[currentIndex] = 0;
       }
+      currentIndex = (currentIndex + 1) % pits.length; // Circular increment
+      // Skip opponent's store
+      if (isPlayer1 && currentIndex === 13) continue;
+      if (!isPlayer1 && currentIndex === 6) continue;
+      pits[currentIndex]++;
       stones--;
+      // Check if the last stone lands in the player's store
+      if (currentIndex === storeIndex) {
+        lastLandedInStore = true;
+      } else {
+        lastLandedInStore = false;
+      }
     }
-
-    if (player === 1) {
-      setState({
-        ...state,
-        player1Pits: pits,
-        player2Pits: opponentPits,
-        player1Store: newPlayer1Store,
-        currentPlayer: 2,
-      });
-    } else {
-      setState({
-        ...state,
-        player1Pits: opponentPits,
-        player2Pits: pits,
-        player2Store: newPlayer2Store,
-        currentPlayer: 1,
-      });
+    // Capture logic and continuation rule
+    if (
+      !lastLandedInStore &&
+      currentIndex >= playerStartIndex &&
+      currentIndex <= playerEndIndex
+    ) {
+      const oppositeIndex = 12 - currentIndex;
+      // If landing in non-empty pit on player's side, continue distributing
+      if (pits[currentIndex] > 1) {
+        stones = pits[currentIndex];
+        pits[currentIndex] = 0;
+        // continue;
+      }
+      // Capture rule: last stone in empty pit with stones opposite
+      if (pits[currentIndex] === 1 && pits[oppositeIndex] > 0) {
+        pits[storeIndex] += pits[oppositeIndex] + 1; // Add captured stones + last stone to store
+        pits[oppositeIndex] = 0;
+        pits[currentIndex] = 0;
+      }
     }
+    console.log(lastLandedInStore);
+    console.log(currentIndex);
+    // Check for game over
+    const player1Empty = pits.slice(0, 6).every((stones) => stones === 0);
+    const player2Empty = pits.slice(7, 13).every((stones) => stones === 0);
+    if (player1Empty || player2Empty) {
+      // Add remaining stones to the respective player's store
+      pits[6] += pits.slice(0, 6).reduce((a, b) => a + b, 0);
+      pits[13] += pits.slice(7, 13).reduce((a, b) => a + b, 0);
+      // Clear all pits
+      for (let i = 0; i < 6; i++) pits[i] = 0;
+      for (let i = 7; i < 13; i++) pits[i] = 0;
+      setState({ pits, currentPlayer: null }); // Game over
+      const player1Score = pits[6];
+      const player2Score = pits[13];
+      if (player1Score > player2Score) {
+        alert(
+          `Game over! Player 1 wins with ${player1Score} stones vs ${player2Score} stones!`
+        );
+      } else if (player2Score > player1Score) {
+        alert(
+          `Game over! Player 2 wins with ${player2Score} stones vs ${player1Score} stones!`
+        );
+      } else {
+        alert(`Game over! It's a tie with ${player1Score} stones each!`);
+      }
+      return;
+    }
+    // Switch turns if the last stone did not land in the store
+    const nextPlayer = lastLandedInStore ? player : player === 1 ? 2 : 1;
+    setState({ pits, currentPlayer: nextPlayer });
   };
-
   return (
     <div className="mancala-board">
-      <div className="mancala player2">{player2Store}</div>
+      {/* Opponent's store */}
+      <div className="mancala player2">{state.pits[13]}</div>
+      {/* Opponent's pits (reverse order: 12 to 7) */}
       <div className="pits">
-        {player2Pits.map((stones, index) => (
-          <button
-            key={index}
-            className={`pit ${currentPlayer === 2 ? "active" : ""}`}
-            onClick={() => handlePitClick(2, index)}
-          >
-            {stones}
-          </button>
-        ))}
+        {state.pits
+          .slice(7, 13)
+          .reverse()
+          .map((stones, reverseIndex) => {
+            const index = 12 - reverseIndex; // Map reverse index to actual index
+            return (
+              <button
+                key={index}
+                className={`pit ${state.currentPlayer === 2 ? "active" : ""}`}
+                onClick={() => handlePitClick(2, index)}
+              >
+                {stones}
+              </button>
+            );
+          })}
       </div>
+      {/* Player's pits (0 to 5) */}
       <div className="pits">
-        {player1Pits.map((stones, index) => (
+        {state.pits.slice(0, 6).map((stones, index) => (
           <button
             key={index}
-            className={`pit ${currentPlayer === 1 ? "active" : ""}`}
+            className={`pit ${state.currentPlayer === 1 ? "active" : ""}`}
             onClick={() => handlePitClick(1, index)}
           >
             {stones}
           </button>
         ))}
       </div>
-      <div className="mancala player1">{player1Store}</div>
+      {/* Player's store */}
+      <div className="mancala player1">{state.pits[6]}</div>
+      {/* Hint Container */}
+      {/* <div className="hint-container">
+        <div className="hint-card">
+          <AI_hint state={state} />
+        </div>
+      </div> */}
     </div>
   );
 }
-
 export default GameBoard;

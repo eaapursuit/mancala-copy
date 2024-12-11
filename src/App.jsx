@@ -1,17 +1,10 @@
 import { useState } from "react";
-import "./App.css";
 import GameBoard from "./Gameboard";
-
 function App() {
   const [state, setState] = useState({
-    player1Pits: [4, 4, 4, 4, 4, 4],
-    player2Pits: [4, 4, 4, 4, 4, 4],
-    player1Store: 0,
-    player2Store: 0,
-    currentPlayer: 1,
+    pits: [4, 4, 4, 4, 4, 4, 0, 4, 4, 4, 4, 4, 4, 0], // Combined array for both players' pits and stores
+    currentPlayer: 1, // Track whose turn it is (1 or 2)
   });
-
   return <GameBoard state={state} setState={setState} />;
 }
-
 export default App;
