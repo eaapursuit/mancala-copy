@@ -35,6 +35,7 @@ const AI_hint = ({ state, setHighlightedPit, hint, setHint }) => {
                   - Maximize stones in the current player's store.
                   - Aim for extra turns by landing the last stone in the store.
                   - Capture opponent's stones if the last stone lands in an empty pit on the player's side.
+                  - Double check the numbers in pit to make sure it is not zero.
                   - Never suggest a move that has zero stones left in the pit.
                   - Remember player 2's store is at index 13 and player 1's store is at index 6.
                   - Remember player 2's pit start from from index 12 to 7 and player 1's pit start from from index 0 to 5.
