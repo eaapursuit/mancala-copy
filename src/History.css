@@ -1,4 +1,4 @@
-.history-wrapper {
+/* .history-wrapper {
   display: flex;
   justify-content: center;
   align-items: center;
@@ -8,9 +8,9 @@
 }
 
 .history-container {
-  background-color: #fff; /* White background */
+  background-color: #fff; 
   border-radius: 10px;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); 
   padding: 40px;
   max-width: 600px;
   text-align: center;
@@ -28,4 +28,4 @@
 .history-container p {
   font-size: 1.2rem;
   margin: 0;
-}
+} */

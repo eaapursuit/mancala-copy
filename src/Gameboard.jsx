@@ -1,13 +1,25 @@
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { useTransition, animated } from "@react-spring/web";
-import "./Gameboard.css";
 import AI_hint from "./AI_hint";
-import Marble from "./Marble";
+import "./Gameboard.css";
+import ThreeScene from "./components/ThreeScene";
 
 function GameBoard({ state, setState }) {
   const [hint, setHint] = useState("");
   const [highlightedPit, setHighlightedPit] = useState(null);
   console.log("Gameboard state:", state); // Debug log
+
+  useEffect(() => {
+    console.log("Gameboard mounted");
+    console.log("Initial state", state);
+
+    //check for WebGL support
+    const canvas = document.createElement('canvas');
+    const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+    if (!gl) {
+      console.error('WebGL is not supported in this browser');
+    }
+  }, []);
 
   const resetGame = () => {
     const initialPits = Array(14).fill(4); // Set 4 stones in each pit
@@ -118,77 +130,22 @@ function GameBoard({ state, setState }) {
     setHint("");
   };
   console.log("Highlighted pit:", highlightedPit);
-
+  
   return (
     <div className="mancala-board">
-      <div className="mancala player2">{state.pits[13]}</div>
-      <div className="pits">
-        {state.pits
-          .slice(7, 13)
-          .reverse()
-          .map((stones, reverseIndex) => {
-            const index = 12 - reverseIndex; // Map reverse index to actual index
-
-            //Generate marble elements
-            const marbleElements = Array(stones)
-              .fill()
-              .map((_, idx) => (
-                <Marble key={`${index}-${idx}`} className="stone"/>
-              ));
-
-            return (
-              <button
-                key={index}
-                className={`pit ${state.currentPlayer === 2 ? "active" : ""} ${
-                  highlightedPit === index ? "highlighted" : ""
-                }`}
-                onClick={() => handlePitClick(2, index)}
-              >
-                <div className="stones-container">{marbleElements}</div>
-              </button>
-            );
-          })}
-      </div>
-      <div className="pits">
-        {state.pits.slice(0, 6).map((stones, index) => {
-          const transitions = useTransition(Array(stones).fill(), {
-            from: { opacity: 0, transform: "scale(0)" },
-            enter: { opacity: 1, transform: "scale(1)" },
-            leave: { opacity: 0, transform: "scale(0)" },
-            keys: (item, idx) => `${index}-${idx}`,
-          });
-
-          return (
-            <button
-              key={index}
-              className={`pit ${state.currentPlayer === 1 ? "active" : ""} ${
-                highlightedPit === index ? "highlighted" : ""
-              }`}
-              onClick={() => handlePitClick(1, index)}
-            >
-              {/* {Render stones} */}
-              <div className="stones-container">
-                {transitions((style, _, idx) => (
-                  <animated.div key={idx} style={style} className="stone" >
-                    <Marble/>
-                  </animated.div>
-                ))}
-              </div>
-            </button>
-          );
-        })}
-      </div>
-      <div className="mancala player1">{state.pits[6]}</div>
-      <div className="mancala-player-store">
+      {/* <div className="mancala player2">{state.pits[13]}</div> */}
+      <ThreeScene state={state} onPitClick={handlePitClick} /> {/* Include ThreeScene*/}
+      {/* <div className="mancala player1">{state.pits[6]}</div> */}
+      {/* <div className="mancala-player-store">
         <h2>Player 2 Store</h2>
-      </div>
-      <div className="mancala-player-turn">
+      </div> */}
+      {/* <div className="mancala-player-turn">
         <h1>Player {state.currentPlayer}'s turn</h1>
-      </div>
-      <div className="mancala-player-store">
+      </div> */}
+      {/* <div className="mancala-player-store">
         <h2>Player 1 Store</h2>
-      </div>
-      <div className="hint-container">
+      </div> */}
+      {/* <div className="hint-container">
         <div className="hint-card">
           <AI_hint
             state={state}
@@ -196,15 +153,13 @@ function GameBoard({ state, setState }) {
             hint={hint}
             setHint={setHint}
           />
-          
-        </div>
-        
-      </div>
-      <div className="reset-container">
+        </div> 
+      </div> */}
+      {/* <div className="reset-container">
       <button className="reset-button" onClick={resetGame}>
         Reset Game
       </button>
-    </div>
+    </div> */}
     </div>
   );
 }

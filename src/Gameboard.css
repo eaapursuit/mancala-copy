@@ -1,4 +1,4 @@
-.mancala-board {
+/* .mancala-board {
   font-family: Arial, sans-serif;
   font-size: 14px;
   display: grid;
@@ -10,8 +10,8 @@
   border-radius: 15px;
   max-width: 800px;
   margin: 0 auto;
-}
-.mancala {
+} */
+/* .mancala {
   background-color: #deb887;
   border-radius: 50px;
   height: 300px;
@@ -21,13 +21,13 @@
   font-size: 24px;
   color: #000;
   border: 3px solid #654321;
-}
-.pits {
+} */
+/* .pits {
   display: grid;
   grid-template-columns: repeat(6, 1fr);
   gap: 10px;
   align-items: center;
-}
+} */
 .pit {
   position: relative;
   background: #e0b080;
@@ -80,19 +80,19 @@
   padding: 10px;
   border-radius: 5px;
 }
-.player2 {
+/* .player2 {
   grid-row: 1 / span 2;
   grid-column: 1;
-}
-.mancala-player-turn {
-  grid-column: 2 / span 1; /* Spans across the entire width of the board */
+} */
+/* .mancala-player-turn {
+  grid-column: 2 / span 1; /* Spans across the entire width of the board 
   text-align: center;
   background-color: #f0f0f0;
   padding: 15px;
   border-radius: 5px;
-}
+} */
 /* Responsive design */
-@media (max-width: 768px) {
+/* @media (max-width: 768px) {
   .mancala-board {
     grid-template-columns: 60px 1fr 60px;
     gap: 10px;
@@ -107,13 +107,13 @@
     height: 200px;
     font-size: 18px;
   }
-}
+} */
 /* Container for the hint */
-.hint-container {
-  grid-column: 1 / span 3; /* Spans across the entire width of the board */
+/* .hint-container {
+  grid-column: 1 / span 3; /* Spans across the entire width of the board 
   text-align: center;
-}
-.hint-card {
+} */
+/* .hint-card {
   display: inline-block;
   padding: 15px 20px;
   border: 1px solid #ddd;
@@ -126,9 +126,9 @@
   animation: fadeIn 0.3s ease-in-out;
   max-width: 90%;
   margin: 0 auto;
-}
+} */
 
-.reset-button{
+/* .reset-button{
   padding: 12px 18px;
   border: 1px solid #ddd;
   border-radius: 8px;
@@ -140,7 +140,7 @@
   animation: fadeIn 0.3s ease-in-out;
   max-width: 90%;
   margin: 0 auto;
-}
+} */
 /* Fade-in animation for the hint */
 @keyframes fadeIn {
   from {
@@ -186,17 +186,17 @@ body.theme-dark .theme-toggle {
   background-color: #0056b3;
 }
 
-/* Light theme */
+/* Light theme
 body.theme-light {
   background-color: #f0f0f0;
   color: #333;
-}
+} */
 
-/* Dark theme */
+/* Dark theme
 body.theme-dark {
   background-color: #333;
   color: #f0f0f0;
-}
+} */
 
 /* Example adjustments for pits and stones */
 .pit {
@@ -221,8 +221,8 @@ body.theme-dark .stone {
   flex-direction: row;
 }
 
-.mancala-board {
-  margin-left: 250px; /* Matches the sidebar width */
+/* .mancala-board {
+  margin-left: 250px; /* Matches the sidebar width 
   padding: 20px;
   flex-grow: 1;
-}
+} */
