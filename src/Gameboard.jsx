@@ -1,5 +1,4 @@
 import React, { useState, useRef, useEffect } from "react";
-// import { useTransition, animated } from "@react-spring/web";
 // import AI_hint from "./AI_hint";
 import "./Gameboard.css";
 import ThreeScene from "./components/ThreeScene";

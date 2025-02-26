@@ -1,10 +1,6 @@
 import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
 import React, { useState } from "react";
-import Gameboard from "./Gameboard";
-// import History from "./History";
-// import Rules from "./Rules";
-import Homepage from "./Homepage";
-
+import Gameboard from "./Gameboard";  
 
 function App() {
   const [state, setState] = useState({
@@ -23,9 +19,9 @@ function App() {
           <Routes>
             <Route
               path="/"
-              element= {<Homepage/>}
+              element= {<Gameboard state={state} setState={setState}/>}
             />
-            <Route path="/game" element={<Gameboard state={state} setState={setState}/>} />
+            {/* <Route path="/game" element={<Gameboard state={state} setState={setState}/>} /> */}
             {/* <Route path="/history" element={<History />} /> */}
             {/* <Route path="/rules" element={<Rules />} /> */}
           </Routes>
