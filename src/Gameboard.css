@@ -28,7 +28,7 @@
   gap: 10px;
   align-items: center;
 } */
-.pit {
+/* .pit {
   position: relative;
   background: #e0b080;
   border-radius: 50%;
@@ -38,39 +38,39 @@
   align-items: center;
   justify-content: center;
   overflow: hidden;
-  /* font-size: 20px; */
+  /* font-size: 20px; 
   border: 3px solid #654321;
-  /* cursor: pointer; */
-  /* transition: all 0.3s ease; */
-}
+  /* cursor: pointer; 
+  /* transition: all 0.3s ease; 
+} */
 
-.stones-container {
+/* .stones-container {
   display: flex;
   flex-wrap: wrap;
   gap: 4px;
-}
+} */
 
-.stone {
+/* .stone {
   width: 4px;
   height: 4px;
   background-color: #000;
   border-radius: 50%;
-}
+} */
 
-.pit:hover {
+/* .pit:hover {
   transform: scale(1.05);
   background-color: #cd853f;
-}
-.pit.active {
+} */
+/* .pit.active {
   border-color: #ffd700;
   box-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
-}
-.pit:disabled {
+} */
+/* .pit:disabled {
   cursor: not-allowed;
   opacity: 0.7;
-}
+} */
 /* Player specific styles */
-.player1 {
+/* .player1 {
   grid-row: 1 / span 2;
   grid-column: 3;
 }
@@ -79,7 +79,7 @@
   background-color: #f0f0f0;
   padding: 10px;
   border-radius: 5px;
-}
+} */
 /* .player2 {
   grid-row: 1 / span 2;
   grid-column: 1;
@@ -142,7 +142,7 @@
   margin: 0 auto;
 } */
 /* Fade-in animation for the hint */
-@keyframes fadeIn {
+/* @keyframes fadeIn {
   from {
     opacity: 0;
     transform: translateY(-10px);
@@ -151,15 +151,15 @@
     opacity: 1;
     transform: translateY(0);
   }
-}
-.pit.highlighted {
+} */
+/* .pit.highlighted {
   background-color: yellow;
   border: 3px solid red;
   animation: pulse 1s infinite;
-}
+} */
 
 
-@keyframes pulse {
+/* @keyframes pulse {
   0% {
     transform: scale(1);
   }
@@ -169,9 +169,9 @@
   100% {
     transform: scale(1);
   }
-}
+} */
 
-.theme-toggle {
+/* .theme-toggle {
   top: 10px;
   right: 10px;
   padding: 10px 20px;
@@ -180,11 +180,11 @@
   border: none;
   border-radius: 5px;
   cursor: pointer;
-}
+} */
 
-body.theme-dark .theme-toggle {
+/* body.theme-dark .theme-toggle {
   background-color: #0056b3;
-}
+} */
 
 /* Light theme
 body.theme-light {
@@ -199,7 +199,7 @@ body.theme-dark {
 } */
 
 /* Example adjustments for pits and stones */
-.pit {
+/* .pit {
   background-color: #ddd;
   border: 1px solid #ccc;
 }
@@ -214,15 +214,15 @@ body.theme-dark .pit {
 }
 body.theme-dark .stone {
   background-color: #bbb;
-}
-
+} */
+/* 
 .game-container {
   display: flex;
   flex-direction: row;
-}
+} */
 
 /* .mancala-board {
   margin-left: 250px; /* Matches the sidebar width 
   padding: 20px;
   flex-grow: 1;
-} */
+} 
