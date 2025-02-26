@@ -2,7 +2,6 @@ import React, { useEffect, useRef } from "react";
 import { setupScene } from "./sceneSetup";
 import { createGameBoard } from "./boardSetup";
 import { createPits } from "./pitSetup";
-import { updatePits } from "./updatePits";
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/Addons.js";
 
@@ -12,12 +11,13 @@ const ThreeScene = ({ state, onPitClick }) => {
   const cameraRef = useRef(null);
   const rendererRef = useRef(null);
   const pitsRef = useRef([]);
-  const stonesRef = useRef([]); //Store stone meshes
+  // const stonesRef = useRef([]); //Store stone meshes
   const raycasterRef = useRef(new THREE.Raycaster());
   const mouseRef = useRef(new THREE.Vector2());
+  const highlightMarkerRef = useRef(null);
 
   useEffect(() => {
-    if (!state || !state.pits || !containerRef.current) return;
+    if (!containerRef.current) return;
 
     //initialize scene
     const { scene, camera, renderer } = setupScene(containerRef.current);
@@ -27,10 +27,9 @@ const ThreeScene = ({ state, onPitClick }) => {
 
     // Add game board and pits
     createGameBoard(scene);
-    createPits(scene, pitsRef.current);
 
-    //Update stones
-    updatePits(scene, pitsRef.current, stonesRef.current, state);
+    // Create invisible interaction pits
+    createPits(scene, pitsRef.current);
 
     //Add OrbitControls with restrictions
     const controls = new OrbitControls(camera, renderer.domElement);
@@ -42,6 +41,8 @@ const ThreeScene = ({ state, onPitClick }) => {
 
     const handleResize = () => {
       const container = containerRef.current;
+      if (!container) return;
+
       const width = container.clientWidth;
       const height = container.clientHeight;
 
@@ -56,7 +57,7 @@ const ThreeScene = ({ state, onPitClick }) => {
 
     //handle mouse interaction
     const handleMouseMove = (event) => {
-      if (!rendererRef.current || !cameraRef.current) return;
+      if (!rendererRef.current || !cameraRef.current || !state) return;
 
       const rect = rendererRef.current.domElement.getBoundingClientRect();
       mouseRef.current.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
@@ -66,40 +67,58 @@ const ThreeScene = ({ state, onPitClick }) => {
       raycasterRef.current.setFromCamera(mouseRef.current, cameraRef.current);
       const intersects = raycasterRef.current.intersectObjects(pitsRef.current);
 
-      //reset all pit materials
-      pitsRef.current.forEach((pit) => {
-        if (pit.material.emissive) {
-          pit.material.emissive.setHex(0x000000);
-        }
-      });
+      // Hide highlight ring if it exists
+      if (highlightMarkerRef.current) {
+        scene.remove(highlightMarkerRef.current);
+        highlightMarkerRef.current = null;
+      }
 
       //highlight valid pit
       if (intersects.length > 0) {
         const pit = intersects[0].object;
-        const { player, pitIndex } = pit.userData;
+        const { player, pitIndex, isStore } = pit.userData;
 
         if (
+          !isStore &&
           player === state.currentPlayer &&
-          ((player === 1 && pitIndex < 6) ||
-            (player === 2 && pitIndex > 6 && pitIndex < 13)) &&
           state.pits[pitIndex] > 0
         ) {
-          pit.material.emissive.setHex(0x666666);
+          const ringGeometry = new THREE.RingGeometry(0.7, 0.9, 32);
+          const ringMaterial = new THREE.MeshBasicMaterial({
+            color: 0xffff00,
+            side: THREE.DoubleSide,
+          });
+
+          highlightMarkerRef.current = new THREE.Mesh(
+            ringGeometry,
+            ringMaterial
+          );
+          highlightMarkerRef.current.rotation.x = -Math.PI / 2;
+          highlightMarkerRef.current.position.set(
+            pit.position.x,
+            0.51,
+            pit.position.z
+          );
+
+          scene.add(highlightMarkerRef.current);
         }
       }
     };
 
     const handleClick = (event) => {
-      if (!cameraRef.current) return;
+      if (!cameraRef.current || !state || !onPitClick) return;
 
       raycasterRef.current.setFromCamera(mouseRef.current, cameraRef.current);
       const intersects = raycasterRef.current.intersectObjects(pitsRef.current);
 
       if (intersects.length > 0) {
         const pit = intersects[0].object;
-        const { player, pitIndex } = pit.userData;
+        const { player, pitIndex, isStore } = pit.userData;
 
-        if (state.pits[pitIndex] > 0) {
+        if (
+          !isStore &&
+          player === state.currentPlayer &&
+          state.pits[pitIndex] > 0) {
           onPitClick(player, pitIndex);
         }
       }
@@ -115,12 +134,6 @@ const ThreeScene = ({ state, onPitClick }) => {
 
       requestAnimationFrame(animate);
       controls.update();
-
-      //Animate stones
-      stonesRef.current.forEach((stone) => {
-        stone.rotation.x += 0.01;
-        stone.rotation.y += 0.01;
-      });
 
       rendererRef.current.render(sceneRef.current, cameraRef.current);
     };

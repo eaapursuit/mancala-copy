@@ -1,12 +1,12 @@
 import React, { useState, useRef, useEffect } from "react";
-import { useTransition, animated } from "@react-spring/web";
-import AI_hint from "./AI_hint";
+// import { useTransition, animated } from "@react-spring/web";
+// import AI_hint from "./AI_hint";
 import "./Gameboard.css";
 import ThreeScene from "./components/ThreeScene";
 
 function GameBoard({ state, setState }) {
   const [hint, setHint] = useState("");
-  const [highlightedPit, setHighlightedPit] = useState(null);
+  // const [highlightedPit, setHighlightedPit] = useState(null);
   console.log("Gameboard state:", state); // Debug log
 
   useEffect(() => {
@@ -32,11 +32,9 @@ function GameBoard({ state, setState }) {
     });
 
     setHint(""); // Clear any hints
-    setHighlightedPit(null); 
   };
 
   const handlePitClick = (player, index) => {
-    if (highlightedPit === index) setHighlightedPit(null); // Clear the highlight on click
     const isPlayer1 = player === 1;
     const pits = [...state.pits];
     const playerStartIndex = isPlayer1 ? 0 : 7;
@@ -61,22 +59,15 @@ function GameBoard({ state, setState }) {
     let currentIndex = index;
     let lastLandedInStore = false;
     while (
-      stones > 0 ||
-      (stones === 0 && currentIndex !== storeIndex && pits[currentIndex] > 1)
-    ) {
-      if (
-        stones === 0 &&
-        currentIndex !== storeIndex &&
-        pits[currentIndex] > 1
-      ) {
-        stones += pits[currentIndex];
-        pits[currentIndex] = 0;
-      }
-      currentIndex = (currentIndex + 1) % pits.length;
+      stones > 0) {
+        currentIndex = (currentIndex + 1) % pits.length;
+
       if (isPlayer1 && currentIndex === 13) continue;
       if (!isPlayer1 && currentIndex === 6) continue;
+      
       pits[currentIndex]++;
       stones--;
+      
       if (currentIndex === storeIndex) {
         lastLandedInStore = true;
       } else {
@@ -87,17 +78,14 @@ function GameBoard({ state, setState }) {
     if (
       !lastLandedInStore &&
       currentIndex >= playerStartIndex &&
-      currentIndex <= playerEndIndex
+      currentIndex <= playerEndIndex &&
+      pits[currentIndex] === 1
     ) {
       const oppositeIndex = 12 - currentIndex;
-      if (pits[currentIndex] > 1) {
-        stones = pits[currentIndex];
-        pits[currentIndex] = 0;
-      }
-      if (pits[currentIndex] === 1 && pits[oppositeIndex] > 0) {
+      if (pits[oppositeIndex] > 0) {
         pits[storeIndex] += pits[oppositeIndex] + 1;
         pits[oppositeIndex] = 0;
-        pits[currentIndex] = 0;
+        pits[currentIndex] = 0
       }
     }
 
@@ -129,37 +117,11 @@ function GameBoard({ state, setState }) {
     setState({ pits, currentPlayer: nextPlayer });
     setHint("");
   };
-  console.log("Highlighted pit:", highlightedPit);
   
   return (
     <div className="mancala-board">
-      {/* <div className="mancala player2">{state.pits[13]}</div> */}
       <ThreeScene state={state} onPitClick={handlePitClick} /> {/* Include ThreeScene*/}
-      {/* <div className="mancala player1">{state.pits[6]}</div> */}
-      {/* <div className="mancala-player-store">
-        <h2>Player 2 Store</h2>
-      </div> */}
-      {/* <div className="mancala-player-turn">
-        <h1>Player {state.currentPlayer}'s turn</h1>
-      </div> */}
-      {/* <div className="mancala-player-store">
-        <h2>Player 1 Store</h2>
-      </div> */}
-      {/* <div className="hint-container">
-        <div className="hint-card">
-          <AI_hint
-            state={state}
-            setHighlightedPit={setHighlightedPit}
-            hint={hint}
-            setHint={setHint}
-          />
-        </div> 
-      </div> */}
-      {/* <div className="reset-container">
-      <button className="reset-button" onClick={resetGame}>
-        Reset Game
-      </button>
-    </div> */}
+      
     </div>
   );
 }
