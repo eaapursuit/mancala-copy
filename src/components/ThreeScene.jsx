@@ -2,6 +2,7 @@ import React, { useEffect, useRef } from "react";
 import { setupScene } from "./sceneSetup";
 import { createGameBoard } from "./boardSetup";
 import { createPits } from "./pitSetup";
+import { updatePits } from "./updatePits";
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/Addons.js";
 
@@ -10,8 +11,10 @@ const ThreeScene = ({ state, onPitClick }) => {
   const sceneRef = useRef(null);
   const cameraRef = useRef(null);
   const rendererRef = useRef(null);
+  //Stores the references to the invisible pit meshes and stone meshes
   const pitsRef = useRef([]);
-  // const stonesRef = useRef([]); //Store stone meshes
+  const stonesRef = useRef([]); //Store stone meshes
+  
   const raycasterRef = useRef(new THREE.Raycaster());
   const mouseRef = useRef(new THREE.Vector2());
   const highlightMarkerRef = useRef(null);
@@ -35,6 +38,7 @@ const ThreeScene = ({ state, onPitClick }) => {
     const controls = new OrbitControls(camera, renderer.domElement);
     controls.enableDamping = true;
     controls.dampingFactor = 0.05;
+
     controls.maxPolarAngle = Math.PI / 2.1; //Limit vertical rotation
     controls.minDistance = 15;
     controls.maxDistance = 25;
@@ -43,8 +47,11 @@ const ThreeScene = ({ state, onPitClick }) => {
       const container = containerRef.current;
       if (!container) return;
 
-      const width = container.clientWidth;
-      const height = container.clientHeight;
+      const width = containerRef.current.clientWidth;
+      const height = containerRef.current.clientHeight;
+      camera.aspect = width / height;
+      camera.updateProjectionMatrix();
+      renderer.setSize(width, height);
 
       if (cameraRef.current && rendererRef.current) {
         cameraRef.current.aspect = width / height;
@@ -54,6 +61,7 @@ const ThreeScene = ({ state, onPitClick }) => {
     };
 
     window.addEventListener("resize", handleResize);
+    handleResize();
 
     //handle mouse interaction
     const handleMouseMove = (event) => {
@@ -124,8 +132,8 @@ const ThreeScene = ({ state, onPitClick }) => {
       }
     };
 
-    renderer.domElement.addEventListener("mousemove", handleMouseMove);
-    renderer.domElement.addEventListener("click", handleClick);
+     renderer.domElement.addEventListener("mousemove", handleMouseMove);
+     renderer.domElement.addEventListener("click", handleClick);
 
     //Animation loop
     const animate = () => {
@@ -134,8 +142,7 @@ const ThreeScene = ({ state, onPitClick }) => {
 
       requestAnimationFrame(animate);
       controls.update();
-
-      rendererRef.current.render(sceneRef.current, cameraRef.current);
+      renderer.render(scene, camera);
     };
     animate();
 
@@ -152,6 +159,9 @@ const ThreeScene = ({ state, onPitClick }) => {
         );
       }
 
+      renderer.dispose();
+      controls.dispose();
+
       //Dispose of three.js objects
       if (sceneRef.current) {
         sceneRef.current.traverse((object) => {
@@ -162,11 +172,14 @@ const ThreeScene = ({ state, onPitClick }) => {
           }
         });
       }
-      rendererRef.current.dispose();
-      controls.dispose();
+      
     };
-  }, [state, onPitClick]);
+  }, []);
 
+useEffect(() => {
+  if(!sceneRef.current) return;
+  updatePits(sceneRef.current, pitsRef.current, stonesRef.current, state);
+}, [state])
   return (
     <div
       ref={containerRef}

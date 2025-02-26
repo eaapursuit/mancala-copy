@@ -105,24 +105,24 @@ export function createGameBoard(scene) {
       height = 0.8;
     }
     
-    // Create the cylinder geometry for subtraction
-    const holeGeometry = new THREE.CylinderGeometry(radius, radius, height, 32);
-    const holeMesh = new THREE.Mesh(holeGeometry, boardMaterial);
+    // // Create the cylinder geometry for subtraction
+     const holeGeometry = new THREE.CylinderGeometry(radius, radius, height, 32);
+     const holeMesh = new THREE.Mesh(holeGeometry, boardMaterial);
     
-    // Create cylinder geometry for the hole
-    if(def.store) {
-      holeMesh.scale.set(1.3, 1, 3)
-    }
+    // // Create cylinder geometry for the hole
+     if(def.store) {
+       holeMesh.scale.set(1.3, 1, 3)
+     }
 
-    // Position the cylinder so it creates a partial indentation
-    holeMesh.position.set(def.x, 1 - (height / 2), def.z);
+    // // Position the cylinder so it creates a partial indentation
+      holeMesh.position.set(def.x, 1 - (height / 2), def.z);
 
-    //update the hole mesh matrix before CSG:
-    holeMesh.updateMatrix();
-    const holeCSG = CSG.fromMesh(holeMesh);
+    // //update the hole mesh matrix before CSG:
+      holeMesh.updateMatrix();
+     const holeCSG = CSG.fromMesh(holeMesh);
 
-    // Convert to CSG and subtract from board
-    boardCSG = boardCSG.subtract(holeCSG);
+    // // Convert to CSG and subtract from board
+     boardCSG = boardCSG.subtract(holeCSG);
     
   });
 
