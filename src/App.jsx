@@ -15,6 +15,9 @@ function App() {
 
 
 
+
+
+        
   return (
     <Router>
       <div className="app">
@@ -28,7 +31,7 @@ function App() {
               path="/gameboard"
               element={<Gameboard state={state} setState={setState} />}
             />
-            {/* <Route path="/game" element={<Gameboard state={state} setState={setState}/>} /> */}
+            <Route path="/game" element={<Gameboard state={state} setState={setState}/>} />
             <Route path="/history" element={<History />} />
             <Route path="/rules" element={<Rules />} />
           </Routes>
