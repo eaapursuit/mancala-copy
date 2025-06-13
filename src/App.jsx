@@ -1,6 +1,10 @@
 import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
 import React, { useState } from "react";
-import Gameboard from "./Gameboard";  
+import Gameboard from "./Gameboard";
+ import History from "./History";
+import Rules from "./Rules";
+import LandingPage from "./LandingPage";
+
 
 function App() {
   const [state, setState] = useState({
@@ -9,21 +13,24 @@ function App() {
   });
 
 
+
+
   return (
     <Router>
-      <div
-        className="app"
-      >
-        
+      <div className="app">
         <div className="main-content">
           <Routes>
             <Route
               path="/"
-              element= {<Gameboard state={state} setState={setState}/>}
+              element={<LandingPage />}
+            />
+            <Route
+              path="/gameboard"
+              element={<Gameboard state={state} setState={setState} />}
             />
             {/* <Route path="/game" element={<Gameboard state={state} setState={setState}/>} /> */}
-            {/* <Route path="/history" element={<History />} /> */}
-            {/* <Route path="/rules" element={<Rules />} /> */}
+            <Route path="/history" element={<History />} />
+            <Route path="/rules" element={<Rules />} />
           </Routes>
         </div>
       </div>
