@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import "./LandingPage.css";
-import ThreeScene from "./components/ThreeScene";
+import ThreeScene from "../components/ThreeScene";
 
 function LandingPage() {
   const navigate = useNavigate();
@@ -22,7 +22,9 @@ function LandingPage() {
             How To Play
           </Link>
         </nav>
-        <button className="landing_play_button" onClick={handleButtonClick}>Play Now</button>
+        <button className="landing_play_button" onClick={handleButtonClick}>
+          Play Now
+        </button>
       </div>
     </>
   );

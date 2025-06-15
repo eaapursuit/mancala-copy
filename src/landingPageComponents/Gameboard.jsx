@@ -1,7 +1,38 @@
-import React, { useState, useRef, useEffect } from "react";
-// import AI_hint from "./AI_hint";
+import React, { useState, useEffect } from "react";
+import PropTypes from "prop-types";
 import "./Gameboard.css";
-import ThreeScene from "./components/ThreeScene";
+import ThreeScene from "../components/ThreeScene";
+
+
+function generateInitialStones(pits) {
+  return pits.flatMap((count, pitIndex) =>
+    Array.from({ length: count }, (_, i) => ({
+      id: `${pitIndex}-${i}`,
+      pitIndex,
+    }))
+  );
+}
+
+function GameOverlay({ currentPlayer, pits }) {
+  const scoreA = pits[6];
+  const scoreB = pits[13];
+
+  return (
+    <div className="game-overlay">
+      <div className="turn-indicator">
+        Turn: {currentPlayer === 1 ? "Player 1" : "Player 2"}
+      </div>
+      <div className="score-board">
+        Player 1 Score: {scoreA} - Player 2 Score: {scoreB}{" "}
+      </div>
+    </div>
+  );
+}
+
+GameOverlay.propTypes = {
+  currentPlayer: PropTypes.number.isRequired,
+  pits: PropTypes.arrayOf(PropTypes.number).isRequired,
+};
 
 function animateDistribution(
   pits,
@@ -9,12 +40,16 @@ function animateDistribution(
   stones,
   isPlayer1,
   setState,
-  onFinish
+  onFinish,
+  stonesList,
+  setStonesList
 ) {
   let currentIndex = fromIndex;
   let stonesLeft = stones;
   const newPits = [...pits];
-
+  
+  const stonesToMove = stonesList.filter(s => s.pitIndex === fromIndex)
+  let stoneIndex = 0;
   const intervalId = setInterval(() => {
     //Are we done placing all the stones?
     if (stonesLeft <= 0) {
@@ -34,11 +69,17 @@ function animateDistribution(
     newPits[currentIndex]++;
     stonesLeft--;
 
+    if(stoneIndex < stonesToMove.length) {
+      stonesToMove[stoneIndex].pitIndex = currentIndex;
+      stoneIndex++;
+    }
+
     // Partial update so we can see each stone appear
     setState((prev) => ({
       ...prev,
       pits: newPits,
     }));
+    setStonesList(prevStones => [...prevStones]);
   }, 400); //time between placing stones
 }
 
@@ -110,35 +151,45 @@ function finalizeMove(currentIndex, pits, isPlayer1, setState) {
   // setHint("");
 }
 
-function GameBoard({ state, setState }) {
-  const [hint, setHint] = useState("");
-  console.log("Gameboard state:", state); // Debug log
+export default function GameBoard({ state, setState }) {
+  const [previewPath, setPreviewPath] = useState([]);
+  const [stonesList, setStonesList] = useState(() =>
+    generateInitialStones(state.pits)
+  );
 
   useEffect(() => {
-    console.log("Gameboard mounted");
-    console.log("Initial state", state);
-
-    //check for WebGL support
-    const canvas = document.createElement("canvas");
-    const gl =
-      canvas.getContext("webgl") || canvas.getContext("experimental-webgl");
-    if (!gl) {
-      console.error("WebGL is not supported in this browser");
+    const total = state.pits.reduce((sum, v) => sum + v, 0);
+    if (stonesList.length !== total) {
+      setStonesList(generateInitialStones(state.pits));
     }
-  }, []);
+  }, [state.pits, stonesList.length]);
 
-  const resetGame = () => {
-    const initialPits = Array(14).fill(4); // Set 4 stones in each pit
-    initialPits[6] = 0; // Player 1's store
-    initialPits[13] = 0; // Player 2's store
+  // Compute distribution path without mutating state
+  function computePreview(startIndex) {
+    const { pits, currentPlayer } = state;
+    let count = pits[startIndex];
+    if (count === 0) return [];
+    let idx = startIndex;
+    const path = [];
+    while (count > 0) {
+      idx = (idx + 1) % pits.length;
+      // skip opponent store
+      if (currentPlayer === 1 && idx === 13) continue;
+      if (currentPlayer === 2 && idx === 6) continue;
+      path.push(idx);
+      count--;
+    }
+    return path;
+  }
 
-    setState({
-      pits: initialPits,
-      currentPlayer: 1, // Reset to Player 1's turn
-    });
-
-    setHint(""); // Clear any hints
-  };
+  // When hovering over a pit, show the preview path
+  function handleHoverPit(player, pitIndex) {
+    if (player !== state.currentPlayer) return;
+    setPreviewPath(computePreview(pitIndex));
+  }
+  function handleHoverOut() {
+    setPreviewPath([]);
+  }
 
   function handlePitClick(player, index) {
     const isPlayer1 = player === 1;
@@ -175,16 +226,32 @@ function GameBoard({ state, setState }) {
           currentPlayer: nextPlayer,
         });
         finalizeMove(lastIndex, finalPits, isPlayer1, setState);
-      }
+      }, stonesList, setStonesList
     );
   }
 
+  // Pass these handlers into threeScene
   return (
-    <div className="mancala-board">
-      <ThreeScene state={state} onPitClick={handlePitClick} />{" "}
-      {/* Include ThreeScene*/}
+    <div style={{ position: "relative" }}>
+      <GameOverlay currentPlayer={state.currentPlayer} pits={state.pits} />
+      <ThreeScene
+        state={state}
+        stonesList={stonesList}
+        setState={setState}
+        previewPath={previewPath}
+        onPitHover={handleHoverPit}
+        onPitOut={handleHoverOut}
+        onPitClick={handlePitClick}
+      />
     </div>
   );
 }
 
-export default GameBoard;
+GameBoard.propTypes = {
+  state: PropTypes.shape({
+    pits: PropTypes.arrayOf(PropTypes.number).isRequired,
+    currentPlayer: PropTypes.number,
+  }).isRequired,
+
+  setState: PropTypes.func.isRequired,
+};

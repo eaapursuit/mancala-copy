@@ -22,7 +22,7 @@ export function updatePits(scene, pitsRef, stonesRef, state) {
     if(!pitMesh) return;
 
     const {x, y, z} = pitMesh.position;
-
+    const player = (pitIndex >= 0 && pitIndex <= 6) ? 1 : 2;
     //arrange the stones in a spiral pattern inside each pit
     for (let i = 0; i < stoneCount; i++) {
       const angle = (i / stoneCount) * Math.PI * 2;
@@ -31,7 +31,7 @@ export function updatePits(scene, pitsRef, stonesRef, state) {
       const stoneZ = z + Math.sin(angle) * radius;
       const stoneY = y + 0.02 * (i / 5);
 
-      const stoneMesh = createStone(scene, stoneX, stoneY, stoneZ);
+      const stoneMesh = createStone(scene, stoneX, stoneY, stoneZ, player);
       stonesRef.push(stoneMesh);
     }
   });
