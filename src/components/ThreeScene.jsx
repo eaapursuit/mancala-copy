@@ -1,4 +1,9 @@
-import React, { useEffect, useRef, forwardRef, useImperativeHandle } from "react";
+import React, {
+  useEffect,
+  useRef,
+  forwardRef,
+  useImperativeHandle,
+} from "react";
 import { setupScene } from "./sceneSetup";
 import { createGameBoard } from "./boardSetup";
 import { createPits } from "./pitSetup";
@@ -10,7 +15,7 @@ import PropTypes from "prop-types";
 
 const ThreeScene = forwardRef(function ThreeScene(
   { state, previewPath = [], onPitHover, onPitOut, onPitClick },
-  ref
+  ref,
 ) {
   const containerRef = useRef();
   const sceneRef = useRef();
@@ -22,6 +27,10 @@ const ThreeScene = forwardRef(function ThreeScene(
   const previewMarkersRef = useRef([]);
   const raycaster = useRef(new THREE.Raycaster());
   const mouse = useRef(new THREE.Vector2());
+  const callbacksRef = useRef({ onPitHover, onPitOut, onPitClick });
+  useEffect(() => {
+    callbacksRef.current = { onPitHover, onPitOut, onPitClick };
+  });
   // Tracks temp stones created during move animation so we can clean them up
   const animStones = useRef([]);
 
@@ -77,7 +86,7 @@ const ThreeScene = forwardRef(function ThreeScene(
           sourcePit.position.x + (Math.random() - 0.5) * spread,
           sourcePit.position.y + 1.2,
           sourcePit.position.z + (Math.random() - 0.5) * spread,
-          isP1 ? 1 : 2
+          isP1 ? 1 : 2,
         );
         tempStones.push(stone);
         stepIndex++;
@@ -89,7 +98,7 @@ const ThreeScene = forwardRef(function ThreeScene(
           targetPit.position.x + (Math.random() - 0.5) * landSpread,
           targetPit.position.y + 0.15,
           targetPit.position.z + (Math.random() - 0.5) * landSpread,
-          360
+          360,
         ).then(() => {
           // Small gap between stones so they feel sequential
           setTimeout(dropNext, 40);
@@ -142,9 +151,12 @@ const ThreeScene = forwardRef(function ThreeScene(
 
       if (intersects.length > 0) {
         const pit = intersects[0].object;
-        onPitHover?.(pit.userData.player, pit.userData.pitIndex);
+        callbacksRef.current.onPitHover?.(
+          pit.userData.player,
+          pit.userData.pitIndex,
+        );
       } else {
-        onPitOut?.();
+        callbacksRef.current.onPitOut?.();
       }
     };
 
@@ -153,7 +165,10 @@ const ThreeScene = forwardRef(function ThreeScene(
       const intersects = raycaster.current.intersectObjects(pitsRef.current);
       if (!intersects.length) return;
       const pit = intersects[0].object;
-      onPitClick?.(pit.userData.player, pit.userData.pitIndex);
+      callbacksRef.current.onPitClick?.(
+        pit.userData.player,
+        pit.userData.pitIndex,
+      );
     };
 
     // Touch support
@@ -166,7 +181,10 @@ const ThreeScene = forwardRef(function ThreeScene(
       const intersects = raycaster.current.intersectObjects(pitsRef.current);
       if (!intersects.length) return;
       const pit = intersects[0].object;
-      onPitClick?.(pit.userData.player, pit.userData.pitIndex);
+      callbacksRef.current.onPitClick?.(
+        pit.userData.player,
+        pit.userData.pitIndex,
+      );
     };
 
     renderer.domElement.addEventListener("mousemove", handleMouseMove);
