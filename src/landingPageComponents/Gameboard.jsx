@@ -73,8 +73,12 @@ function applyFinalize(lastIndex, pits, isPlayer1) {
   }
 
   const nextPlayer = lastLandedInStore
-    ? isPlayer1 ? 1 : 2
-    : isPlayer1 ? 2 : 1;
+    ? isPlayer1
+      ? 1
+      : 2
+    : isPlayer1
+      ? 2
+      : 1;
 
   return { pits: result, currentPlayer: nextPlayer, gameOver: null };
 }
@@ -86,8 +90,8 @@ function GameOverModal({ score1, score2, onRematch, onMenu }) {
     score1 > score2
       ? `Player 1 wins!`
       : score2 > score1
-      ? `Player 2 wins!`
-      : `It's a tie!`;
+        ? `Player 2 wins!`
+        : `It's a tie!`;
 
   return (
     <div className="modal-backdrop">
@@ -147,7 +151,9 @@ function ScoreBar({ pits, currentPlayer, isAnimating }) {
           style={{ width: `${(score1 / total) * 100}%` }}
         />
       </div>
-      <div className={`player-tag right ${currentPlayer === 2 ? "active" : ""}`}>
+      <div
+        className={`player-tag right ${currentPlayer === 2 ? "active" : ""}`}
+      >
         <span className="player-score">{score2}</span>
         <span className="player-label">Player 2</span>
       </div>
@@ -229,7 +235,7 @@ export default function GameBoard({ state, setState }) {
     const { path, finalPits, lastIndex } = computeMove(
       state.pits,
       index,
-      isPlayer1
+      isPlayer1,
     );
 
     // Visually empty the source pit immediately
@@ -243,6 +249,8 @@ export default function GameBoard({ state, setState }) {
     setPreviewPath([]);
     setHint("");
     setHighlightedPit(null);
+
+    console.log("threeSceneRef:", threeSceneRef.current);
 
     // Run the Three.js stone animation, then apply final state
     threeSceneRef.current?.playMoveAnimation(index, path, () => {
@@ -270,8 +278,7 @@ export default function GameBoard({ state, setState }) {
   }
 
   // Hint pit highlighted on top of normal preview
-  const hintHighlight =
-    highlightedPit !== null ? [highlightedPit] : [];
+  const hintHighlight = highlightedPit !== null ? [highlightedPit] : [];
   const combinedPreview = [...new Set([...previewPath, ...hintHighlight])];
 
   return (
