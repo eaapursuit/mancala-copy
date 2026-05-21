@@ -1,170 +1,192 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import PropTypes from "prop-types";
+import { useNavigate } from "react-router-dom";
 import "./Gameboard.css";
 import ThreeScene from "../components/ThreeScene";
+import AI_hint from "./AI_hint";
 
+// ─── Pure game logic ──────────────────────────────────────────────────────────
 
-function generateInitialStones(pits) {
-  return pits.flatMap((count, pitIndex) =>
-    Array.from({ length: count }, (_, i) => ({
-      id: `${pitIndex}-${i}`,
-      pitIndex,
-    }))
-  );
+/**
+ * Computes the full distribution path and resulting pit array for a move.
+ * Returns { path, finalPits, lastIndex } — no side effects.
+ */
+function computeMove(pits, fromIndex, isPlayer1) {
+  const newPits = [...pits];
+  let stones = newPits[fromIndex];
+  newPits[fromIndex] = 0;
+  let currentIndex = fromIndex;
+  const path = [];
+
+  while (stones > 0) {
+    currentIndex = (currentIndex + 1) % 14;
+    if (isPlayer1 && currentIndex === 13) continue;
+    if (!isPlayer1 && currentIndex === 6) continue;
+    newPits[currentIndex]++;
+    path.push(currentIndex);
+    stones--;
+  }
+
+  return { path, finalPits: newPits, lastIndex: currentIndex };
 }
 
-function GameOverlay({ currentPlayer, pits }) {
-  const scoreA = pits[6];
-  const scoreB = pits[13];
+/**
+ * Applies capture and game-over logic after distribution.
+ * Returns the new full state object — no side effects.
+ */
+function applyFinalize(lastIndex, pits, isPlayer1) {
+  const storeIndex = isPlayer1 ? 6 : 13;
+  const playerStart = isPlayer1 ? 0 : 7;
+  const playerEnd = isPlayer1 ? 5 : 12;
+  const lastLandedInStore = lastIndex === storeIndex;
+  const result = [...pits];
+
+  // Capture rule
+  if (
+    !lastLandedInStore &&
+    lastIndex >= playerStart &&
+    lastIndex <= playerEnd &&
+    result[lastIndex] === 1
+  ) {
+    const oppositeIndex = 12 - lastIndex;
+    if (result[oppositeIndex] > 0) {
+      result[storeIndex] += result[oppositeIndex] + 1;
+      result[oppositeIndex] = 0;
+      result[lastIndex] = 0;
+    }
+  }
+
+  // Game over
+  const p1Empty = result.slice(0, 6).every((s) => s === 0);
+  const p2Empty = result.slice(7, 13).every((s) => s === 0);
+
+  if (p1Empty || p2Empty) {
+    result[6] += result.slice(0, 6).reduce((a, b) => a + b, 0);
+    result[13] += result.slice(7, 13).reduce((a, b) => a + b, 0);
+    for (let i = 0; i < 6; i++) result[i] = 0;
+    for (let i = 7; i < 13; i++) result[i] = 0;
+    return {
+      pits: result,
+      currentPlayer: null,
+      gameOver: { score1: result[6], score2: result[13] },
+    };
+  }
+
+  const nextPlayer = lastLandedInStore
+    ? isPlayer1 ? 1 : 2
+    : isPlayer1 ? 2 : 1;
+
+  return { pits: result, currentPlayer: nextPlayer, gameOver: null };
+}
+
+// ─── Sub-components ───────────────────────────────────────────────────────────
+
+function GameOverModal({ score1, score2, onRematch, onMenu }) {
+  const winner =
+    score1 > score2
+      ? `Player 1 wins!`
+      : score2 > score1
+      ? `Player 2 wins!`
+      : `It's a tie!`;
 
   return (
-    <div className="game-overlay">
-      <div className="turn-indicator">
-        Turn: {currentPlayer === 1 ? "Player 1" : "Player 2"}
-      </div>
-      <div className="score-board">
-        Player 1 Score: {scoreA} - Player 2 Score: {scoreB}{" "}
+    <div className="modal-backdrop">
+      <div className="modal-card">
+        <h2 className="modal-title">{winner}</h2>
+        <div className="modal-scores">
+          <div className="modal-score">
+            <span className="modal-score-label">Player 1</span>
+            <span className="modal-score-value">{score1}</span>
+          </div>
+          <div className="modal-score">
+            <span className="modal-score-label">Player 2</span>
+            <span className="modal-score-value">{score2}</span>
+          </div>
+        </div>
+        <div className="modal-actions">
+          <button className="btn-primary" onClick={onRematch}>
+            Play again
+          </button>
+          <button className="btn-secondary" onClick={onMenu}>
+            Main menu
+          </button>
+        </div>
       </div>
     </div>
   );
 }
 
-GameOverlay.propTypes = {
-  currentPlayer: PropTypes.number.isRequired,
-  pits: PropTypes.arrayOf(PropTypes.number).isRequired,
+GameOverModal.propTypes = {
+  score1: PropTypes.number.isRequired,
+  score2: PropTypes.number.isRequired,
+  onRematch: PropTypes.func.isRequired,
+  onMenu: PropTypes.func.isRequired,
 };
 
-function animateDistribution(
-  pits,
-  fromIndex,
-  stones,
-  isPlayer1,
-  setState,
-  onFinish,
-  stonesList,
-  setStonesList
-) {
-  let currentIndex = fromIndex;
-  let stonesLeft = stones;
-  const newPits = [...pits];
-  
-  const stonesToMove = stonesList.filter(s => s.pitIndex === fromIndex)
-  let stoneIndex = 0;
-  const intervalId = setInterval(() => {
-    //Are we done placing all the stones?
-    if (stonesLeft <= 0) {
-      clearInterval(intervalId);
-      onFinish(currentIndex, newPits);
-      return;
-    }
-
-    //Go to the next pit
-    currentIndex = (currentIndex + 1) % newPits.length;
-
-    //Slip opponent's store
-    if (isPlayer1 && currentIndex === 13) return;
-    if (!isPlayer1 && currentIndex === 6) return;
-
-    // Place 1 Stone here
-    newPits[currentIndex]++;
-    stonesLeft--;
-
-    if(stoneIndex < stonesToMove.length) {
-      stonesToMove[stoneIndex].pitIndex = currentIndex;
-      stoneIndex++;
-    }
-
-    // Partial update so we can see each stone appear
-    setState((prev) => ({
-      ...prev,
-      pits: newPits,
-    }));
-    setStonesList(prevStones => [...prevStones]);
-  }, 400); //time between placing stones
+function ErrorToast({ message }) {
+  if (!message) return null;
+  return <div className="error-toast">{message}</div>;
 }
 
-function finalizeMove(currentIndex, pits, isPlayer1, setState) {
-  const storeIndex = isPlayer1 ? 6 : 13;
-  let lastLandedInStore = currentIndex === storeIndex;
+ErrorToast.propTypes = { message: PropTypes.string };
 
-  // Capture logic
-  const playerStartIndex = isPlayer1 ? 0 : 7;
-  const playerEndIndex = isPlayer1 ? 5 : 12;
+function ScoreBar({ pits, currentPlayer, isAnimating }) {
+  const score1 = pits[6];
+  const score2 = pits[13];
+  const total = score1 + score2 || 1;
 
-  if (
-    !lastLandedInStore &&
-    currentIndex >= playerStartIndex &&
-    currentIndex <= playerEndIndex &&
-    pits[currentIndex] === 1
-  ) {
-    const oppositeIndex = 12 - currentIndex;
-    if (pits[oppositeIndex] > 0) {
-      pits[storeIndex] += pits[oppositeIndex] + 1;
-      pits[oppositeIndex] = 0;
-      pits[currentIndex] = 0;
-    }
-  }
-
-  // Check if one side is empty => game over
-  const player1Empty = pits.slice(0, 6).every((s) => s === 0);
-  const player2Empty = pits.slice(7, 13).every((s) => s === 0);
-
-  if (player1Empty || player2Empty) {
-    // Move remaining stones to the appropriate stores
-    pits[6] += pits.slice(0, 6).reduce((a, b) => a + b, 0);
-    pits[13] += pits.slice(7, 13).reduce((a, b) => a + b, 0);
-
-    for (let i = 0; i < 6; i++) pits[i] = 0;
-    for (let i = 7; i < 13; i++) pits[i] = 0;
-
-    // No currentPlayer for next turn
-    setState({ pits, currentPlayer: null });
-
-    // Show winner
-    const player1Score = pits[6];
-    const player2Score = pits[13];
-    if (player1Score > player2Score) {
-      alert(
-        `Game over! Player 1 wins with ${player1Score} stones vs Player 2 with ${player2Score} stones!`
-      );
-    } else if (player2Score > player1Score) {
-      alert(
-        `Game over! Player 2 wins with ${player2Score} stones vs Player 1 with ${player1Score} stones!`
-      );
-    } else {
-      alert(`Game over! It's a tie with ${player1Score} stones each!`);
-    }
-    return;
-  }
-
-  //Determine the next player
-  const nextPlayer = lastLandedInStore
-    ? isPlayer1
-      ? 1
-      : 2
-    : isPlayer1
-    ? 2
-    : 1;
-
-  // Set the updated state
-  setState({ pits, currentPlayer: nextPlayer });
-  // setHint("");
+  return (
+    <div className="score-bar">
+      <div className={`player-tag ${currentPlayer === 1 ? "active" : ""}`}>
+        <span className="player-label">Player 1</span>
+        <span className="player-score">{score1}</span>
+      </div>
+      <div className="score-track">
+        <div
+          className="score-fill"
+          style={{ width: `${(score1 / total) * 100}%` }}
+        />
+      </div>
+      <div className={`player-tag right ${currentPlayer === 2 ? "active" : ""}`}>
+        <span className="player-score">{score2}</span>
+        <span className="player-label">Player 2</span>
+      </div>
+      {isAnimating && <div className="animating-badge">Moving…</div>}
+    </div>
+  );
 }
+
+ScoreBar.propTypes = {
+  pits: PropTypes.arrayOf(PropTypes.number).isRequired,
+  currentPlayer: PropTypes.number,
+  isAnimating: PropTypes.bool,
+};
+
+// ─── Main component ───────────────────────────────────────────────────────────
+
+const INITIAL_PITS = [4, 4, 4, 4, 4, 4, 0, 4, 4, 4, 4, 4, 4, 0];
 
 export default function GameBoard({ state, setState }) {
+  const navigate = useNavigate();
+  const threeSceneRef = useRef(null);
   const [previewPath, setPreviewPath] = useState([]);
-  const [stonesList, setStonesList] = useState(() =>
-    generateInitialStones(state.pits)
-  );
+  const [isAnimating, setIsAnimating] = useState(false);
+  const [errorMsg, setErrorMsg] = useState("");
+  const [gameOver, setGameOver] = useState(null);
+  const [hint, setHint] = useState("");
+  const [highlightedPit, setHighlightedPit] = useState(null);
+  const errorTimerRef = useRef(null);
 
-  useEffect(() => {
-    const total = state.pits.reduce((sum, v) => sum + v, 0);
-    if (stonesList.length !== total) {
-      setStonesList(generateInitialStones(state.pits));
-    }
-  }, [state.pits, stonesList.length]);
+  // Show an error toast that auto-clears after 2 s
+  const showError = useCallback((msg) => {
+    setErrorMsg(msg);
+    clearTimeout(errorTimerRef.current);
+    errorTimerRef.current = setTimeout(() => setErrorMsg(""), 2000);
+  }, []);
 
-  // Compute distribution path without mutating state
+  useEffect(() => () => clearTimeout(errorTimerRef.current), []);
+
+  // Hover preview path
   function computePreview(startIndex) {
     const { pits, currentPlayer } = state;
     let count = pits[startIndex];
@@ -172,8 +194,7 @@ export default function GameBoard({ state, setState }) {
     let idx = startIndex;
     const path = [];
     while (count > 0) {
-      idx = (idx + 1) % pits.length;
-      // skip opponent store
+      idx = (idx + 1) % 14;
       if (currentPlayer === 1 && idx === 13) continue;
       if (currentPlayer === 2 && idx === 6) continue;
       path.push(idx);
@@ -182,67 +203,131 @@ export default function GameBoard({ state, setState }) {
     return path;
   }
 
-  // When hovering over a pit, show the preview path
   function handleHoverPit(player, pitIndex) {
-    if (player !== state.currentPlayer) return;
+    if (player !== state.currentPlayer || isAnimating) return;
     setPreviewPath(computePreview(pitIndex));
   }
+
   function handleHoverOut() {
     setPreviewPath([]);
   }
 
+  // ─── Core move handler ────────────────────────────────────────────────────
+
   function handlePitClick(player, index) {
+    if (isAnimating) return;
+    if (state.currentPlayer !== player) {
+      showError("It's not your turn!");
+      return;
+    }
+    if (state.pits[index] === 0) {
+      showError("That pit is empty!");
+      return;
+    }
+
     const isPlayer1 = player === 1;
-    const pits = [...state.pits];
-    const storeIndex = isPlayer1 ? 6 : 13;
+    const { path, finalPits, lastIndex } = computeMove(
+      state.pits,
+      index,
+      isPlayer1
+    );
 
-    if (state.currentPlayer !== player) return alert("It's not your turn!");
-    if (pits[index] === 0) return alert("You can't start from an empty pit!");
-
-    //Take stones from chosen pit
-    let stones = pits[index];
-    pits[index] = 0;
-
-    // Partial update sp that the pit is now empty
-    setState({
-      ...state,
-      pits,
+    // Visually empty the source pit immediately
+    setState((prev) => {
+      const pits = [...prev.pits];
+      pits[index] = 0;
+      return { ...prev, pits };
     });
 
-    animateDistribution(
-      pits,
-      index,
-      stones,
-      isPlayer1,
-      setState,
-      (lastIndex, finalPits) => {
-        //This runs when all stones are placed
-        const lastLandedInStore = lastIndex === storeIndex;
+    setIsAnimating(true);
+    setPreviewPath([]);
+    setHint("");
+    setHighlightedPit(null);
 
-        const nextPlayer = lastLandedInStore ? player : player === 1 ? 2 : 1;
-
-        setState({
-          pits: finalPits,
-          currentPlayer: nextPlayer,
-        });
-        finalizeMove(lastIndex, finalPits, isPlayer1, setState);
-      }, stonesList, setStonesList
-    );
+    // Run the Three.js stone animation, then apply final state
+    threeSceneRef.current?.playMoveAnimation(index, path, () => {
+      const result = applyFinalize(lastIndex, finalPits, isPlayer1);
+      setState({ pits: result.pits, currentPlayer: result.currentPlayer });
+      if (result.gameOver) {
+        setGameOver(result.gameOver);
+      }
+      setIsAnimating(false);
+    });
   }
 
-  // Pass these handlers into threeScene
+  // ─── Game controls ────────────────────────────────────────────────────────
+
+  function handleReset() {
+    setState({ pits: [...INITIAL_PITS], currentPlayer: 1 });
+    setGameOver(null);
+    setHint("");
+    setHighlightedPit(null);
+    setIsAnimating(false);
+  }
+
+  function handleMenu() {
+    navigate("/");
+  }
+
+  // Hint pit highlighted on top of normal preview
+  const hintHighlight =
+    highlightedPit !== null ? [highlightedPit] : [];
+  const combinedPreview = [...new Set([...previewPath, ...hintHighlight])];
+
   return (
-    <div style={{ position: "relative" }}>
-      <GameOverlay currentPlayer={state.currentPlayer} pits={state.pits} />
-      <ThreeScene
-        state={state}
-        stonesList={stonesList}
-        setState={setState}
-        previewPath={previewPath}
-        onPitHover={handleHoverPit}
-        onPitOut={handleHoverOut}
-        onPitClick={handlePitClick}
+    <div className="game-page">
+      {/* Nav bar */}
+      <header className="game-nav">
+        <button className="nav-btn" onClick={handleMenu}>
+          ← Menu
+        </button>
+        <span className="nav-title">Mancala</span>
+        <button className="nav-btn" onClick={handleReset}>
+          Reset
+        </button>
+      </header>
+
+      {/* Score bar */}
+      <ScoreBar
+        pits={state.pits}
+        currentPlayer={state.currentPlayer}
+        isAnimating={isAnimating}
       />
+
+      {/* Error toast */}
+      <ErrorToast message={errorMsg} />
+
+      {/* Three.js board */}
+      <div className="canvas-wrapper">
+        <ThreeScene
+          ref={threeSceneRef}
+          state={state}
+          previewPath={combinedPreview}
+          onPitHover={handleHoverPit}
+          onPitOut={handleHoverOut}
+          onPitClick={handlePitClick}
+        />
+      </div>
+
+      {/* AI hint panel */}
+      <div className="hint-panel">
+        <AI_hint
+          state={state}
+          setHighlightedPit={setHighlightedPit}
+          hint={hint}
+          setHint={setHint}
+        />
+      </div>
+
+      {/* Game-over modal */}
+      {gameOver && (
+        <GameOverModal
+          score1={gameOver.score1}
+          score2={gameOver.score2}
+          onRematch={handleReset}
+          onMenu={handleMenu}
+        />
+      )}
     </div>
   );
 }
@@ -252,6 +337,5 @@ GameBoard.propTypes = {
     pits: PropTypes.arrayOf(PropTypes.number).isRequired,
     currentPlayer: PropTypes.number,
   }).isRequired,
-
   setState: PropTypes.func.isRequired,
 };
