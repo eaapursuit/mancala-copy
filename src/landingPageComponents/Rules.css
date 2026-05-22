@@ -83,3 +83,14 @@
   transform: scale(1.05);
   box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
 }
+
+@media (max-width: 768px) {
+  .rules-container, 
+  .history-container {
+    padding: 1.5rem; 
+    margin: 1rem;
+    width: auto;
+  }
+  .rules-container h2,
+  .history-container h1 { font-size: 2rem; }
+}

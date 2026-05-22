@@ -312,3 +312,22 @@
 .btn-secondary:hover {
   background: rgba(90, 57, 32, 0.08);
 }
+/* ─── mobile ─────────────────────────────────────────────────────── */
+@media (max-width: 768px) {
+  .modal-card {
+    padding: 1.5rem; 
+    margin: 1rem;
+    width: auto;
+  }
+  .score-bar {
+    padding: 0.5rem;
+    gap: 0.5rem;
+  }
+  .player-label { display: none; }
+  .player-score { font-size: 1.1rem; }
+  .btn-primary, 
+  .btn-secondary {
+    padding: 0.5rem 1rem;
+    font-size: 0.85rem;
+  }
+}

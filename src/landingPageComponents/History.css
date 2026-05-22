@@ -39,3 +39,14 @@ body {
   cursor: pointer;
   transition: transform 0.2s, box-shadow 0.2s;
 }
+
+@media (max-width: 768px) {
+  .rules-container, 
+  .history-container {
+    padding: 1.5rem; 
+    margin: 1rem;
+    width: auto;
+  }
+  .rules-container h2,
+  .history-container h1 { font-size: 2rem; }
+}
