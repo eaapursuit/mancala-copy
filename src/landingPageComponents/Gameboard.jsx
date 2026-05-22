@@ -40,6 +40,7 @@ function applyFinalize(lastIndex, pits, isPlayer1) {
   const playerEnd = isPlayer1 ? 5 : 12;
   const lastLandedInStore = lastIndex === storeIndex;
   const result = [...pits];
+  let captureOccured = null;
 
   // Capture rule
   if (
@@ -53,6 +54,12 @@ function applyFinalize(lastIndex, pits, isPlayer1) {
       result[storeIndex] += result[oppositeIndex] + 1;
       result[oppositeIndex] = 0;
       result[lastIndex] = 0;
+
+      //Record capture data to trigger animation
+      captureOccured = {
+        fromPit: oppositeIndex,
+        toStore: storeIndex,
+      };
     }
   }
 
@@ -80,7 +87,12 @@ function applyFinalize(lastIndex, pits, isPlayer1) {
       ? 2
       : 1;
 
-  return { pits: result, currentPlayer: nextPlayer, gameOver: null };
+  return {
+    pits: result,
+    currentPlayer: nextPlayer,
+    gameOver: null,
+    captureOccured,
+  };
 }
 
 // ─── Sub-components ───────────────────────────────────────────────────────────
@@ -258,11 +270,31 @@ export default function GameBoard({ state, setState }) {
     // Run the Three.js stone animation, then apply final state
     threeSceneRef.current?.playMoveAnimation(index, path, () => {
       const result = applyFinalize(lastIndex, finalPits, isPlayer1);
-      setState({ pits: result.pits, currentPlayer: result.currentPlayer });
-      if (result.gameOver) {
-        setGameOver(result.gameOver);
+
+      if (result.captureOccured) {
+        //Play capture animation first then update state
+        threeSceneRef.current?.playCaptureAnimation(
+          result.captureOccured,
+          () => {
+            setState({
+              pits: result.pits,
+              currentPlayer: result.currentPlayer,
+            });
+            if (result.gameOver) setGameOver(result.gameOver);
+            setIsAnimating(false);
+          },
+        );
+      } else {
+        //No capture, update state normally
+        setState({
+              pits: result.pits,
+              currentPlayer: result.currentPlayer,
+            });
+        if (result.gameOver) 
+          setGameOver(result.gameOver);
+        
+        setIsAnimating(false);
       }
-      setIsAnimating(false);
     });
   }
 

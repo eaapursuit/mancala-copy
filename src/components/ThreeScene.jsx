@@ -107,6 +107,41 @@ const ThreeScene = forwardRef(function ThreeScene(
 
       dropNext();
     },
+    playCaptureAnimation({ fromPit, toStore }, onComplete) {
+      const scene = sceneRef.current;
+      const pitsArr = pitsRef.current;
+      if (!scene || !pitsArr.length) {
+        onComplete?.();
+        return;
+      }
+
+      const sourcePit = pitsArr[fromPit];
+      const targetStore = pitsArr[toStore];
+
+      // Spawn a temporary stone at the captured pit
+      const tempStone = createStone(
+        scene,
+        sourcePit.position.x,
+        sourcePit.position.y + 1.0,
+        sourcePit.position.z,
+        1 
+      );
+
+      // Animate it flying into the store
+      animateStoneToPosition(
+        tempStone,
+        targetStore.position.x,
+        targetStore.position.y + 0.5,
+        targetStore.position.z,
+        600 // Faster 600ms duration for a snappy capture
+      ).then(() => {
+        // Clean up temp stone and finish turn
+        scene.remove(tempStone);
+        tempStone.geometry?.dispose();
+        tempStone.material?.dispose();
+        onComplete?.();
+      });
+    },
   }));
 
   // ─── Scene setup (runs once) ────────────────────────────────────────────
