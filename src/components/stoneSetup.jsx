@@ -3,13 +3,13 @@ import * as THREE from "three";
 export function createStone(scene, x, y, z, player = 1) {
   const stoneGeometry = new THREE.SphereGeometry(0.2, 16, 16);
   
-  const playerColors = {
-    1: "#E2DAD3",
-    2: 0X2F4F4F
-  };
+  // const playerColors = {
+  //   1: "",
+  //   2: 0X2F4F4F
+  // };
   
   const stoneMaterial = new THREE.MeshStandardMaterial({
-    color: playerColors[player] || 0x808080,
+    color: 0xE2DAD3,
     roughness: 0.5,
   });
 

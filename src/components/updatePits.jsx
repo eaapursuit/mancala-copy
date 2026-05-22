@@ -29,7 +29,7 @@ export function updatePits(scene, pitsRef, stonesRef, state) {
       const radius = 0.3 + (i % 3) * 0.1;
       const stoneX = x + Math.cos(angle) * radius;
       const stoneZ = z + Math.sin(angle) * radius;
-      const stoneY = y + 0.02 * (i / 5);
+      const stoneY = y + 0.08 * Math.floor(i / 4);
 
       const stoneMesh = createStone(scene, stoneX, stoneY, stoneZ, player);
       stonesRef.push(stoneMesh);

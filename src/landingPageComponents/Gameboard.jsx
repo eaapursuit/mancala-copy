@@ -210,7 +210,10 @@ export default function GameBoard({ state, setState }) {
   }
 
   function handleHoverPit(player, pitIndex) {
-    if (player !== state.currentPlayer || isAnimating) return;
+    if (player !== state.currentPlayer || isAnimating) {
+      setPreviewPath([]);
+      return;
+    }
     setPreviewPath(computePreview(pitIndex));
   }
 
