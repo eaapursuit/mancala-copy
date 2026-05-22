@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import PropTypes from "prop-types";
 import { useNavigate } from "react-router-dom";
 import "./Gameboard.css";
@@ -247,55 +247,67 @@ export default function GameBoard({ state, setState }) {
     }
 
     const isPlayer1 = player === 1;
-    const { path, finalPits, lastIndex } = computeMove(
-      state.pits,
-      index,
-      isPlayer1,
-    );
-
-    // Visually empty the source pit immediately
-    setState((prev) => {
-      const pits = [...prev.pits];
-      pits[index] = 0;
-      return { ...prev, pits };
-    });
-
     setIsAnimating(true);
     setPreviewPath([]);
     setHint("");
     setHighlightedPit(null);
 
-    console.log("threeSceneRef:", threeSceneRef.current);
+    function playLap(startIndex, currentPits) {
+      const { path, finalPits, lastIndex } = computeMove(
+        currentPits,
+        startIndex,
+        isPlayer1,
+      );
 
-    // Run the Three.js stone animation, then apply final state
-    threeSceneRef.current?.playMoveAnimation(index, path, () => {
-      const result = applyFinalize(lastIndex, finalPits, isPlayer1);
+      // Visually empty the source pit immediately
+      setState((prev) => {
+        const pits = [...prev.pits];
+        pits[startIndex] = 0;
+        return { ...prev, pits };
+      });
 
-      if (result.captureOccured) {
-        //Play capture animation first then update state
-        threeSceneRef.current?.playCaptureAnimation(
-          result.captureOccured,
-          () => {
+      // Run the Three.js stone animation, then apply final state
+      threeSceneRef.current?.playMoveAnimation(startIndex, path, () => {
+        const isStore = lastIndex === 6 || lastIndex === 13;
+
+        // CONTINUOUS SOWING RULE:
+        // If it didn't land in a store, and the pit has > 1 stone (was not empty)
+        if (!isStore && finalPits[lastIndex] > 1) {
+          // Trigger the chain reaction! Pass the new state and start again from this pit.
+          playLap(lastIndex, finalPits);
+        } else {
+          // The chain reaction ends (landed in an empty pit or a store)
+          // Apply standard capture and game-over rules
+          const result = applyFinalize(lastIndex, finalPits, isPlayer1);
+          if (result.captureOccured) {
+            //Play capture animation first then update state
+            threeSceneRef.current?.playCaptureAnimation(
+              result.captureOccured,
+              () => {
+                setState({
+                  pits: result.pits,
+                  currentPlayer: result.currentPlayer,
+                });
+                if (result.gameOver) setGameOver(result.gameOver);
+                setIsAnimating(false);
+              },
+            );
+          } else {
+            //No capture, update state normally
             setState({
               pits: result.pits,
               currentPlayer: result.currentPlayer,
             });
             if (result.gameOver) setGameOver(result.gameOver);
+
             setIsAnimating(false);
-          },
-        );
-      } else {
-        //No capture, update state normally
-        setState({
-              pits: result.pits,
-              currentPlayer: result.currentPlayer,
-            });
-        if (result.gameOver) 
-          setGameOver(result.gameOver);
-        
-        setIsAnimating(false);
-      }
-    });
+          }
+        }
+      });
+    }
+
+    // Kick off the first lap using the clicked index
+    playLap(index, state.pits);
   }
 
   // ─── Game controls ────────────────────────────────────────────────────────

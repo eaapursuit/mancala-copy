@@ -1,4 +1,4 @@
-import React, {
+import {
   useEffect,
   useRef,
   forwardRef,
@@ -241,7 +241,7 @@ const ThreeScene = forwardRef(function ThreeScene(
       controls.dispose();
       renderer.dispose();
     };
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, []);  
 
   // ─── Sync stone meshes with game state ─────────────────────────────────
 
