@@ -237,6 +237,13 @@ export default function GameBoard({ state, setState }) {
 
   function handlePitClick(player, index) {
     if (isAnimating) return;
+
+    // 🚨 STORES ARE OFF LIMITS: Prevent clicking the Mancalas
+    if (index === 6 || index === 13) {
+      showError("You cannot move stones from a store!");
+      return;
+    }
+
     if (state.currentPlayer !== player) {
       showError("It's not your turn!");
       return;
@@ -256,57 +263,49 @@ export default function GameBoard({ state, setState }) {
       const { path, finalPits, lastIndex } = computeMove(
         currentPits,
         startIndex,
-        isPlayer1,
+        isPlayer1
       );
 
-      // Visually empty the source pit immediately
-      setState((prev) => {
-        const pits = [...prev.pits];
-        pits[startIndex] = 0;
-        return { ...prev, pits };
-      });
+      // Notice we are NO LONGER setting state to 0 here! 
+      // The pit will stay full until the animation starts picking them up.
 
-      // Run the Three.js stone animation, then apply final state
-      threeSceneRef.current?.playMoveAnimation(startIndex, path, () => {
-        const isStore = lastIndex === 6 || lastIndex === 13;
+      threeSceneRef.current?.playMoveAnimation(
+        startIndex,
+        path,
+        () => {
+          const isStore = lastIndex === 6 || lastIndex === 13;
 
-        // CONTINUOUS SOWING RULE:
-        // If it didn't land in a store, and the pit has > 1 stone (was not empty)
-        if (!isStore && finalPits[lastIndex] > 1) {
-          // Trigger the chain reaction! Pass the new state and start again from this pit.
-          playLap(lastIndex, finalPits);
-        } else {
-          // The chain reaction ends (landed in an empty pit or a store)
-          // Apply standard capture and game-over rules
-          const result = applyFinalize(lastIndex, finalPits, isPlayer1);
-          if (result.captureOccured) {
-            //Play capture animation first then update state
-            threeSceneRef.current?.playCaptureAnimation(
-              result.captureOccured,
-              () => {
-                setState({
-                  pits: result.pits,
-                  currentPlayer: result.currentPlayer,
-                });
+          if (!isStore && finalPits[lastIndex] > 1) {
+            playLap(lastIndex, finalPits);
+          } else {
+            const result = applyFinalize(lastIndex, finalPits, isPlayer1);
+            if (result.captureOccurred) {
+              threeSceneRef.current?.playCaptureAnimation(result.captureOccurred, () => {
+                setState({ pits: result.pits, currentPlayer: result.currentPlayer });
                 if (result.gameOver) setGameOver(result.gameOver);
                 setIsAnimating(false);
-              },
-            );
-          } else {
-            //No capture, update state normally
-            setState({
-              pits: result.pits,
-              currentPlayer: result.currentPlayer,
-            });
-            if (result.gameOver) setGameOver(result.gameOver);
-
-            setIsAnimating(false);
+              });
+            } else {
+              setState({ pits: result.pits, currentPlayer: result.currentPlayer });
+              if (result.gameOver) setGameOver(result.gameOver);
+              setIsAnimating(false);
+            }
           }
+        },
+        () => {
+          // 🚨 ONE-BY-ONE PICKUP: 
+          // Subtract 1 from the source pit every time a 3D stone takes off
+          setState((prev) => {
+            const stepPits = [...prev.pits];
+            if (stepPits[startIndex] > 0) {
+              stepPits[startIndex] -= 1;
+            }
+            return { ...prev, pits: stepPits };
+          });
         }
-      });
+      );
     }
 
-    // Kick off the first lap using the clicked index
     playLap(index, state.pits);
   }
 

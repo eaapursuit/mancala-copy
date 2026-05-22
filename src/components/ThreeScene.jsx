@@ -41,7 +41,7 @@ const ThreeScene = forwardRef(function ThreeScene(
      * Animates stones moving from fromIndex through path, one by one.
      * Calls onComplete when all stones have landed.
      */
-    playMoveAnimation(fromIndex, path, onComplete) {
+    playMoveAnimation(fromIndex, path, onComplete, onStonePickUp) {
       const scene = sceneRef.current;
       const pitsArr = pitsRef.current;
       if (!scene || !pitsArr.length) {
@@ -70,6 +70,8 @@ const ThreeScene = forwardRef(function ThreeScene(
           onComplete?.();
           return;
         }
+
+        onStonePickUp?.();
 
         const targetPitIndex = path[stepIndex];
         const targetPit = pitsArr[targetPitIndex];
