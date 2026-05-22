@@ -264,23 +264,23 @@ const ThreeScene = forwardRef(function ThreeScene(
     });
     previewMarkersRef.current = [];
 
-    previewPath.forEach((idx) => {
-      const pit = pitsRef.current[idx];
-      if (!pit) return;
-      const radius = pit.userData.isStore ? 1.0 : 0.6;
-      const geom = new THREE.CircleGeometry(radius, 32);
-      const mat = new THREE.MeshBasicMaterial({
-        color: 0xffd700,
-        transparent: true,
-        opacity: 0.5,
-        side: THREE.DoubleSide,
-      });
-      const disc = new THREE.Mesh(geom, mat);
-      disc.rotation.x = -Math.PI / 2;
-      disc.position.set(pit.position.x, pit.position.y + 0.06, pit.position.z);
-      scene.add(disc);
-      previewMarkersRef.current.push(disc);
-    });
+    // previewPath.forEach((idx) => {
+    //   const pit = pitsRef.current[idx];
+    //   if (!pit) return;
+    //   const radius = pit.userData.isStore ? 1.0 : 0.6;
+    //   const geom = new THREE.CircleGeometry(radius, 32);
+    //   const mat = new THREE.MeshBasicMaterial({
+    //     color: 0xffd700,
+    //     transparent: true,
+    //     opacity: 0.5,
+    //     side: THREE.DoubleSide,
+    //   });
+    //   const disc = new THREE.Mesh(geom, mat);
+    //   disc.rotation.x = -Math.PI / 2;
+    //   disc.position.set(pit.position.x, pit.position.y + 0.06, pit.position.z);
+    //   scene.add(disc);
+    //   previewMarkersRef.current.push(disc);
+    // });
 
     return () => {
       previewMarkersRef.current.forEach((m) => {

@@ -68,12 +68,12 @@ export function createGameBoard(scene) {
     { x: 6, z: 2, pitIndex: 5, player: 1, store: false },
 
     //Player 2 row
-    { x: -6, z: -2, pitIndex: 7, player: 2, store: false },
-    { x: -3.6, z: -2, pitIndex: 8, player: 2, store: false },
-    { x: -1.2, z: -2, pitIndex: 9, player: 2, store: false },
-    { x: 1.2, z: -2, pitIndex: 10, player: 2, store: false },
-    { x: 3.6, z: -2, pitIndex: 11, player: 2, store: false },
-    { x: 6, z: -2, pitIndex: 12, player: 2, store: false },
+    { x: 6, z: -2, pitIndex: 7, player: 2, store: false },
+    { x: 3.6, z: -2, pitIndex: 8, player: 2, store: false },
+    { x: 1.2, z: -2, pitIndex: 9, player: 2, store: false },
+    { x: -1.2, z: -2, pitIndex: 10, player: 2, store: false },
+    { x: -3.6, z: -2, pitIndex: 11, player: 2, store: false },
+    { x: -6, z: -2, pitIndex: 12, player: 2, store: false },
 
     // Player 1 store
     { x: 8.5, z: 0, pitIndex: 6, player: 1, store: true },
