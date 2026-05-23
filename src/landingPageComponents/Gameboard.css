@@ -148,18 +148,18 @@
 
 /* ─── Hint panel ──────────────────────────────────────────────────────────── */
 
-.hint-panel {
+/* .hint-panel {
   flex-shrink: 0;
   background: #f0ddc8;
   border-top: 1px solid #d4b896;
   padding: 0.5rem 1.25rem;
   max-height: 140px;
   overflow-y: auto;
-}
+} */
 
 /* ─── AI hint overrides (match the page palette) ─────────────────────────── */
 
-.mancala_hint_bot {
+/* .mancala_hint_bot {
   display: flex;
   align-items: center;
   gap: 1rem;
@@ -206,7 +206,7 @@
   font-size: 0.85rem;
   color: #8b5e3c;
   font-style: italic;
-}
+} */
 
 /* ─── Game-over modal ─────────────────────────────────────────────────────── */
 
@@ -330,4 +330,34 @@
     padding: 0.5rem 1rem;
     font-size: 0.85rem;
   }
+}
+/* ─── Turn Indicator ─────────────────────────────────────────────────────── */
+
+.turn-banner {
+  text-align: center;
+  padding: 0.75rem 2rem;
+  margin: 1rem auto;
+  border-radius: 50px;
+  width: fit-content;
+  font-size: 1.25rem;
+  font-weight: bold;
+  color: #fff;
+  letter-spacing: 1px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+  transition: background-color 0.4s ease, transform 0.2s ease;
+  animation: pulse 2s infinite;
+}
+
+.p1-turn {
+  background-color: #5a3920; /* Matches your root color, adjust if needed */
+}
+
+.p2-turn {
+  background-color: #8b5a2b; /* A slightly different wood tone for P2 */
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.02); }
+  100% { transform: scale(1); }
 }

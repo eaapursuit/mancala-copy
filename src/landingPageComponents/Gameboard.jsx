@@ -3,7 +3,7 @@ import PropTypes from "prop-types";
 import { useNavigate } from "react-router-dom";
 import "./Gameboard.css";
 import ThreeScene from "../components/ThreeScene";
-import AI_hint from "./AI_hint";
+// import AI_hint from "./AI_hint";
 
 // ─── Pure game logic ──────────────────────────────────────────────────────────
 
@@ -191,7 +191,7 @@ export default function GameBoard({ state, setState }) {
   const [isAnimating, setIsAnimating] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
   const [gameOver, setGameOver] = useState(null);
-  const [hint, setHint] = useState("");
+  // const [hint, setHint] = useState("");
   const [highlightedPit, setHighlightedPit] = useState(null);
   const errorTimerRef = useRef(null);
 
@@ -255,7 +255,7 @@ export default function GameBoard({ state, setState }) {
     const isPlayer1 = player === 1;
     setIsAnimating(true);
     setPreviewPath([]);
-    setHint("");
+    // setHint("");
     setHighlightedPit(null);
 
     function playLap(startIndex, currentPits) {
@@ -318,7 +318,7 @@ export default function GameBoard({ state, setState }) {
   function handleReset() {
     setState({ pits: [...INITIAL_PITS], currentPlayer: 1 });
     setGameOver(null);
-    setHint("");
+    // setHint("");
     setHighlightedPit(null);
     setIsAnimating(false);
   }
@@ -328,8 +328,8 @@ export default function GameBoard({ state, setState }) {
   }
 
   // Hint pit highlighted on top of normal preview
-  const hintHighlight = highlightedPit !== null ? [highlightedPit] : [];
-  const combinedPreview = [...new Set([...previewPath, ...hintHighlight])];
+  // const hintHighlight = highlightedPit !== null ? [highlightedPit] : [];
+  // const combinedPreview = [...new Set([...previewPath, ...hintHighlight])];
 
   return (
     <div className="game-page">
@@ -343,6 +343,11 @@ export default function GameBoard({ state, setState }) {
           Reset
         </button>
       </header>
+
+      {/* 🚨 NEW: Dynamic Turn Indicator */}
+    <div className={`turn-banner ${state.currentPlayer === 1 ? 'p1-turn' : 'p2-turn'}`}>
+      {state.currentPlayer === 1 ? "Player 1's Turn (Bottom)" : "Player 2's Turn (Top)"}
+    </div>
 
       {/* Score bar */}
       <ScoreBar
@@ -359,14 +364,14 @@ export default function GameBoard({ state, setState }) {
         <ThreeScene
           ref={threeSceneRef}
           state={state}
-          previewPath={combinedPreview}
+          // previewPath={combinedPreview}
           onPitHover={handleHoverPit}
           onPitOut={handleHoverOut}
           onPitClick={handlePitClick}
         />
       </div>
 
-      {/* AI hint panel */}
+      {/* AI hint panel
       <div className="hint-panel">
         <AI_hint
           state={state}
@@ -374,7 +379,7 @@ export default function GameBoard({ state, setState }) {
           hint={hint}
           setHint={setHint}
         />
-      </div>
+      </div> */}
 
       {/* Game-over modal */}
       {gameOver && (

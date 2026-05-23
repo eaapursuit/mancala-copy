@@ -1,65 +1,120 @@
-import React from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useState } from "react";
+import { Link } from "react-router-dom";
 import "./Rules.css";
 
-export default function Rules() {
-  const navigate = useNavigate();
+function Rules() {
+  const [step, setStep] = useState(0);
 
-  const handleRulesBckBtn = () => {
-    navigate("/");
+  // The step-by-step states for our mini 2D demo board
+  const demoSteps = [
+    {
+      title: "The Board",
+      text: "Welcome to Mancala! The board consists of 6 small pits for each player and 1 large store (Mancala) on the right side.",
+      p2Pits: [4, 4, 4, 4, 4, 4],
+      p1Pits: [4, 4, 4, 4, 4, 4],
+      p1Store: 0,
+      p2Store: 0,
+      highlight: null,
+    },
+    {
+      title: "Moving Stones",
+      text: "On your turn, pick up all stones from one of your pits. Let's say Player 1 picks up the 4 stones from their 3rd pit.",
+      p2Pits: [4, 4, 4, 4, 4, 4],
+      p1Pits: [4, 4, 0, 4, 4, 4], 
+      p1Store: 0,
+      p2Store: 0,
+      highlight: 2, 
+    },
+    {
+      title: "Sowing",
+      text: "Drop one stone into each pit counter-clockwise. Notice how the stones are distributed, including one in your store!",
+      p2Pits: [4, 4, 4, 4, 4, 4],
+      p1Pits: [4, 4, 0, 5, 5, 5],
+      p1Store: 1,
+      p2Store: 0,
+      highlight: "distribute", 
+    },
+    {
+      title: "Free Turn Rule",
+      text: "If your LAST stone lands in your own store, you get to go again! (You skip your opponent's store when going around the board).",
+      p2Pits: [4, 4, 4, 4, 4, 4],
+      p1Pits: [4, 4, 0, 5, 5, 5],
+      p1Store: 1,
+      p2Store: 0,
+      highlight: "store",
+    },
+    {
+      title: "Capture Rule",
+      text: "If your LAST stone lands in an empty pit on your side, you capture that stone PLUS all the stones in the opposite pit! They all go to your store.",
+      p2Pits: [4, 0, 4, 4, 4, 4], 
+      p1Pits: [4, 4, 0, 5, 5, 0], 
+      p1Store: 6, 
+      p2Store: 0,
+      highlight: "capture",
+    }
+  ];
+
+  const currentDemo = demoSteps[step];
+
+  const handleNext = () => {
+    if (step < demoSteps.length - 1) setStep(step + 1);
   };
+
+  const handlePrev = () => {
+    if (step > 0) setStep(step - 1);
+  };
+
   return (
-    <>
-      <div className="rules-wrapper">
-        <div className="rules-container">
-          <section>
-            <h2>Objective</h2>
-            <p>The goal is to collect the most stones in your store.</p>
-          </section>
-          <section>
-            <h2>Gameplay</h2>
-            <ul>
-              <li>
-                Players take turns picking up all stones from one of their pits
-                and sowing them counterclockwise, one stone per pit.
-              </li>
-              <li>
-                If the last stone lands in your store, you take another turn.
-              </li>
-              <li>
-                If the last stone lands in an empty pit on your side, you
-                capture all stones in the directly opposite pit and add them to
-                your store.
-              </li>
-            </ul>
-          </section>
-          <section>
-            <h2>Endgame</h2>
-            <p>
-              The game ends when all six pits on one side are empty. The
-              remaining stones on the other side are collected by that player.
-              The player with the most stones in their store wins.
-            </p>
-          </section>
-          <section>
-            <h2>Tutorial Video</h2>
-            <div className="video-container">
-              <iframe
-                width="560"
-                height="315"
-                src="https://www.youtube.com/embed/LMIidawf1FI"
-                title="Mancala Game Rules Video"
-                frameBorder="0"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                allowFullScreen
-              ></iframe>
+    <div className="rules-wrapper">
+      <div className="rules-container">
+        <h1>How To Play</h1>
+        
+        <div className="demo-section">
+          <h2>{currentDemo.title}</h2>
+          <p className="demo-text">{currentDemo.text}</p>
+
+          {/* Mini 2D Board */}
+          <div className="demo-board">
+            <div className="demo-store p2-store">
+              {currentDemo.p2Store}
             </div>
-          </section>
-          <button className="rules_back_btn" onClick={handleRulesBckBtn}>
-            Back
-          </button>
+            
+            <div className="demo-pits-container">
+              <div className="demo-row">
+                {currentDemo.p2Pits.map((stones, idx) => (
+                  <div key={`p2-${idx}`} className="demo-pit p2-pit">
+                    {stones}
+                  </div>
+                ))}
+              </div>
+              <div className="demo-row">
+                {currentDemo.p1Pits.map((stones, idx) => (
+                  <div 
+                    key={`p1-${idx}`} 
+                    className={`demo-pit p1-pit ${currentDemo.highlight === idx ? 'highlight-pickup' : ''} ${currentDemo.highlight === 'distribute' && idx > 2 ? 'highlight-drop' : ''} ${currentDemo.highlight === 'capture' && idx === 5 ? 'highlight-drop' : ''}`}
+                  >
+                    {stones}
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className={`demo-store p1-store ${currentDemo.highlight === 'store' || currentDemo.highlight === 'capture' ? 'highlight-drop' : ''}`}>
+              {currentDemo.p1Store}
+            </div>
+          </div>
+
+          <div className="demo-controls">
+            <button disabled={step === 0} onClick={handlePrev}>Previous</button>
+            <span>Step {step + 1} of {demoSteps.length}</span>
+            <button disabled={step === demoSteps.length - 1} onClick={handleNext}>Next</button>
+          </div>
         </div>
+
+        <Link to="/" className="back-link">Back to Home</Link>
       </div>
-    </>
+    </div>
   );
 }
+
+export default Rules;

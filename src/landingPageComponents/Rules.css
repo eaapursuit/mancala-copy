@@ -94,3 +94,132 @@
   .rules-container h2,
   .history-container h1 { font-size: 2rem; }
 }
+
+.rules-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background-color: #faf0e6;
+  padding: 2rem;
+}
+
+.rules-container {
+  background: white;
+  padding: 2rem;
+  border-radius: 12px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+  max-width: 800px;
+  width: 100%;
+  text-align: center;
+}
+
+.demo-section {
+  background: #fdfbf7;
+  border: 2px solid #e0d5c1;
+  border-radius: 10px;
+  padding: 1.5rem;
+  margin: 1.5rem 0;
+}
+
+.demo-text {
+  font-size: 1.1rem;
+  color: #5a3920;
+  margin-bottom: 2rem;
+  min-height: 3rem;
+}
+
+/* 2D Board Styling */
+.demo-board {
+  display: flex;
+  align-items: stretch;
+  justify-content: center;
+  gap: 1rem;
+  background: #a8835e; /* Wood board color */
+  padding: 1rem;
+  border-radius: 40px;
+  margin-bottom: 2rem;
+  box-shadow: inset 0 4px 10px rgba(0,0,0,0.3);
+}
+
+.demo-pits-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.demo-row {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.demo-pit {
+  width: 50px;
+  height: 50px;
+  background: #3b2514;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: bold;
+  font-size: 1.2rem;
+  box-shadow: inset 0 3px 6px rgba(0,0,0,0.5);
+  transition: all 0.3s ease;
+}
+
+.demo-store {
+  width: 60px;
+  background: #3b2514;
+  border-radius: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: bold;
+  font-size: 1.5rem;
+  box-shadow: inset 0 3px 6px rgba(0,0,0,0.5);
+  transition: all 0.3s ease;
+}
+
+/* Tutorial Highlights */
+.highlight-pickup {
+  background: #e74c3c;
+  transform: scale(1.1);
+  box-shadow: 0 0 15px #e74c3c;
+}
+
+.highlight-drop {
+  background: #2ecc71;
+  transform: scale(1.1);
+  box-shadow: 0 0 15px #2ecc71;
+}
+
+.demo-controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 1rem;
+}
+
+.demo-controls button {
+  padding: 0.5rem 1.5rem;
+  background: #5a3920;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  font-size: 1rem;
+}
+
+.demo-controls button:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+}
+
+.back-link {
+  display: inline-block;
+  margin-top: 1rem;
+  color: #5a3920;
+  text-decoration: underline;
+  font-weight: bold;
+}
