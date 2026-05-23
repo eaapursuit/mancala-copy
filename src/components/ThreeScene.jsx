@@ -41,7 +41,8 @@ const ThreeScene = forwardRef(function ThreeScene(
      * Animates stones moving from fromIndex through path, one by one.
      * Calls onComplete when all stones have landed.
      */
-    playMoveAnimation(fromIndex, path, onComplete, onStonePickUp) {
+    // We now have 5 parameters! Added onStoneLand
+    playMoveAnimation(fromIndex, path, onComplete, onStonePickUp, onStoneLand) {
       const scene = sceneRef.current;
       const pitsArr = pitsRef.current;
       if (!scene || !pitsArr.length) {
@@ -56,32 +57,30 @@ const ThreeScene = forwardRef(function ThreeScene(
       }
 
       const isP1 = fromIndex <= 6;
-      const tempStones = [];
       let stepIndex = 0;
 
       function dropNext() {
         if (stepIndex >= path.length) {
-          // Remove temp stones — updatePits will recreate them in final positions
-          tempStones.forEach((s) => {
-            scene.remove(s);
-            s.geometry?.dispose();
-            s.material?.dispose();
-          });
-          onComplete?.();
+          // 🚨 THE PAUSE: Wait 400ms after the last stone lands before finishing
+          setTimeout(() => {
+            onComplete?.();
+          }, 400);
           return;
         }
 
+        // 1. Tell React a stone took off
         onStonePickUp?.();
 
         const targetPitIndex = path[stepIndex];
         const targetPit = pitsArr[targetPitIndex];
+        
         if (!targetPit) {
           stepIndex++;
           dropNext();
           return;
         }
 
-        // Spawn stone at source pit, slightly elevated for arc effect
+        // 2. Spawn temporary flying stone
         const spread = sourcePit.userData.isStore ? 0.5 : 0.25;
         const stone = createStone(
           scene,
@@ -90,19 +89,27 @@ const ThreeScene = forwardRef(function ThreeScene(
           sourcePit.position.z + (Math.random() - 0.5) * spread,
           isP1 ? 1 : 2,
         );
-        tempStones.push(stone);
+
         stepIndex++;
 
-        // Animate to target pit with a small random landing offset
+        // 3. Animate flight
         const landSpread = targetPit.userData.isStore ? 0.55 : 0.28;
         animateStoneToPosition(
           stone,
           targetPit.position.x + (Math.random() - 0.5) * landSpread,
           targetPit.position.y + 0.15,
           targetPit.position.z + (Math.random() - 0.5) * landSpread,
-          360,
+          360
         ).then(() => {
-          // Small gap between stones so they feel sequential
+          // 🚨 SEAMLESS HANDOFF: Destroy temp stone the exact millisecond it lands
+          scene.remove(stone);
+          stone.geometry?.dispose();
+          stone.material?.dispose();
+
+          // Tell React it landed (updatePits will instantly draw the real stone in the pile)
+          onStoneLand?.(targetPitIndex);
+
+          // Trigger next stone
           setTimeout(dropNext, 40);
         });
       }
@@ -126,7 +133,7 @@ const ThreeScene = forwardRef(function ThreeScene(
         sourcePit.position.x,
         sourcePit.position.y + 1.0,
         sourcePit.position.z,
-        1 
+        1,
       );
 
       // Animate it flying into the store
@@ -135,7 +142,7 @@ const ThreeScene = forwardRef(function ThreeScene(
         targetStore.position.x,
         targetStore.position.y + 0.5,
         targetStore.position.z,
-        600 // Faster 600ms duration for a snappy capture
+        600, // Faster 600ms duration for a snappy capture
       ).then(() => {
         // Clean up temp stone and finish turn
         scene.remove(tempStone);
@@ -243,7 +250,7 @@ const ThreeScene = forwardRef(function ThreeScene(
       controls.dispose();
       renderer.dispose();
     };
-  }, []);  
+  }, []);
 
   // ─── Sync stone meshes with game state ─────────────────────────────────
 

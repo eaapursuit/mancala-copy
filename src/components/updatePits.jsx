@@ -3,7 +3,7 @@ import * as THREE from 'three'
 
 export function updatePits(scene, pitsRef, stonesRef, state) {
 
-  //Remove existing stones
+  // Ensure we only remove the stones, NOT the pits/stores
   stonesRef.forEach((stone) => {
     scene.remove(stone);
     stone.geometry.dispose();

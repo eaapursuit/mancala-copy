@@ -238,7 +238,6 @@ export default function GameBoard({ state, setState }) {
   function handlePitClick(player, index) {
     if (isAnimating) return;
 
-    // 🚨 STORES ARE OFF LIMITS: Prevent clicking the Mancalas
     if (index === 6 || index === 13) {
       showError("You cannot move stones from a store!");
       return;
@@ -266,13 +265,11 @@ export default function GameBoard({ state, setState }) {
         isPlayer1
       );
 
-      // Notice we are NO LONGER setting state to 0 here! 
-      // The pit will stay full until the animation starts picking them up.
-
       threeSceneRef.current?.playMoveAnimation(
         startIndex,
         path,
         () => {
+          // --- 1. ON COMPLETE ---
           const isStore = lastIndex === 6 || lastIndex === 13;
 
           if (!isStore && finalPits[lastIndex] > 1) {
@@ -293,13 +290,20 @@ export default function GameBoard({ state, setState }) {
           }
         },
         () => {
-          // 🚨 ONE-BY-ONE PICKUP: 
-          // Subtract 1 from the source pit every time a 3D stone takes off
+          // --- 2. ON STONE TAKEOFF ---
+          // Subtract exactly 1 stone from the source pit
           setState((prev) => {
             const stepPits = [...prev.pits];
-            if (stepPits[startIndex] > 0) {
-              stepPits[startIndex] -= 1;
-            }
+            if (stepPits[startIndex] > 0) stepPits[startIndex] -= 1;
+            return { ...prev, pits: stepPits };
+          });
+        },
+        (targetIndex) => {
+          // --- 3. ON STONE LAND ---
+          // Add exactly 1 stone to the target pit
+          setState((prev) => {
+            const stepPits = [...prev.pits];
+            stepPits[targetIndex] += 1;
             return { ...prev, pits: stepPits };
           });
         }
