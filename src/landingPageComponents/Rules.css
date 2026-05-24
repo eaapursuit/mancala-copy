@@ -8,7 +8,7 @@
 }
 
 .rules-wrapper {
-   display: flex;
+  display: flex;
   justify-content: center;
   align-items: center;
   min-height: 100vh;
@@ -31,7 +31,7 @@
 }
 
 .rules-container h2 {
-    font-size: 2.5rem;
+  font-size: 2.5rem;
   margin-bottom: 1.25rem; /* ~20px */
   color: var(--primary-color);
 }
@@ -42,7 +42,6 @@
   text-align: left;
 }
 
-
 .rules-container ul {
   list-style: disc;
   padding-left: 1.25rem; /* ~20px */
@@ -52,7 +51,7 @@
   position: relative;
   width: 100%;
   padding-top: 56.25%; /* 16:9 aspect */
-  margin-top: 1.25rem;  /* ~20px */
+  margin-top: 1.25rem; /* ~20px */
   overflow: hidden;
 }
 
@@ -61,11 +60,9 @@
   inset: 0;
   width: 100%;
   height: 100%;
-  border-radius: 10px;    /* rounded corners */
+  border-radius: 10px; /* rounded corners */
   box-shadow: var(--box-shadow);
-  
 }
-
 
 .rules_back_btn {
   margin-top: 1.5rem;
@@ -76,7 +73,9 @@
   border: none;
   border-radius: 0.5rem;
   cursor: pointer;
-  transition: transform 0.2s, box-shadow 0.2s;
+  transition:
+    transform 0.2s,
+    box-shadow 0.2s;
 }
 
 .rules_back_btn:hover {
@@ -85,14 +84,16 @@
 }
 
 @media (max-width: 768px) {
-  .rules-container, 
+  .rules-container,
   .history-container {
-    padding: 1.5rem; 
+    padding: 1.5rem;
     margin: 1rem;
     width: auto;
   }
   .rules-container h2,
-  .history-container h1 { font-size: 2rem; }
+  .history-container h1 {
+    font-size: 2rem;
+  }
 }
 
 .rules-wrapper {
@@ -108,7 +109,7 @@
   background: white;
   padding: 2rem;
   border-radius: 12px;
-  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
   max-width: 800px;
   width: 100%;
   text-align: center;
@@ -139,7 +140,7 @@
   padding: 1rem;
   border-radius: 40px;
   margin-bottom: 2rem;
-  box-shadow: inset 0 4px 10px rgba(0,0,0,0.3);
+  box-shadow: inset 0 4px 10px rgba(0, 0, 0, 0.3);
 }
 
 .demo-pits-container {
@@ -164,7 +165,7 @@
   color: white;
   font-weight: bold;
   font-size: 1.2rem;
-  box-shadow: inset 0 3px 6px rgba(0,0,0,0.5);
+  box-shadow: inset 0 3px 6px rgba(0, 0, 0, 0.5);
   transition: all 0.3s ease;
 }
 
@@ -178,7 +179,7 @@
   color: white;
   font-weight: bold;
   font-size: 1.5rem;
-  box-shadow: inset 0 3px 6px rgba(0,0,0,0.5);
+  box-shadow: inset 0 3px 6px rgba(0, 0, 0, 0.5);
   transition: all 0.3s ease;
 }
 

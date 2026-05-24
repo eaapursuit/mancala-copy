@@ -146,7 +146,7 @@ function ErrorToast({ message }) {
 
 ErrorToast.propTypes = { message: PropTypes.string };
 
-function ScoreBar({ pits, currentPlayer, isAnimating }) {
+function ScoreBar({ pits, currentPlayer }) {
   const score1 = pits[6];
   const score2 = pits[13];
   const total = score1 + score2 || 1;
@@ -169,7 +169,7 @@ function ScoreBar({ pits, currentPlayer, isAnimating }) {
         <span className="player-score">{score2}</span>
         <span className="player-label">Player 2</span>
       </div>
-      {isAnimating && <div className="animating-badge">Moving…</div>}
+      
     </div>
   );
 }
